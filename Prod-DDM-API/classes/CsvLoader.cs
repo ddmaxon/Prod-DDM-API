@@ -5,19 +5,20 @@ using Prod_DDM_API.Classes.Db;
 using Prod_DDM_API.Data;
 using System.Data;
 using static System.Net.WebRequestMethods;
+using Prod_DDM_API.types;
 
 namespace Prod_DDM_API.Classes
 {
     public class CsvLoader
     {
-        private List<string> _csv;
+        private List<CsvLine> _csv;
         private MongoController storage;
         private FileInfo _file;
         private string _file_path;
 
         public CsvLoader(string csvPath = "./")
         {
-            this._csv = new List<string>();
+            this._csv = new List<CsvLine>();
             this.storage = new MongoController();
             this.loadCsv(csvPath);
             this._file_path = csvPath;
@@ -26,6 +27,7 @@ namespace Prod_DDM_API.Classes
 
         public void loadCsv(string path)
         {
+            var indexOfres = 1;
             using (var reader = new StreamReader($"{path}"))
             {
                 while (!reader.EndOfStream)
@@ -35,7 +37,8 @@ namespace Prod_DDM_API.Classes
                     if (val == null)
                         continue;
 
-                    this._csv.Add(val);
+                    this._csv.Add(new CsvLine(val, indexOfres));
+                    indexOfres++;
                 }
             }
         }
@@ -52,6 +55,17 @@ namespace Prod_DDM_API.Classes
             return this._file.CreationTime;
         }
 
+        public object GetTimeline()
+        {
+            string initTime = this._csv[0].SplitList()[0];
+            string latestTime = this._csv[this._csv.Count - 1].SplitList()[0];
+
+            // Berechne die Differenz zwischen initTime und latestTime
+            TimeSpan difference = DateTime.Parse(latestTime) - DateTime.Parse(initTime);
+
+            return new { initTime, latestTime, difference };
+        }
+
         public bool CheckDBData(string timestamp)
         {
             /* var tests = this.storage.Search(new { timestamp });
@@ -64,12 +78,12 @@ namespace Prod_DDM_API.Classes
             return false;
         }
 
-        public List<string> GetCsvLines()
+        public List<CsvLine> GetCsvLines()
         {
             return _csv;
         }
 
-        public string GetCsvLine(int lineNr)
+        public CsvLine GetCsvLine(int lineNr)
         {
             try
             {
@@ -87,13 +101,13 @@ namespace Prod_DDM_API.Classes
             {
                 List<object> result = new List<object>();
 
-                foreach (string str in this._csv)
+                foreach (CsvLine str in this._csv)
                 {
 
                     // search subStr in every line
-                    if (str.ToLower().Contains(subStr.ToLower()))
+                    if (str.data.ToLower().Contains(subStr.ToLower()))
                     {
-                        dynamic item = this.GetIndexOfSearch(str);
+                        dynamic item = this.GetIndexOfSearch(str.data);
                         result.Add(new { indexOf = item.indexOf, data = item.subStr });
                     }
                 }
@@ -121,12 +135,12 @@ namespace Prod_DDM_API.Classes
             List<string> result = new List<string>();
             var indexOfres = 0;
 
-            foreach (string str in this._csv)
+            foreach (CsvLine str in this._csv)
             {
                 // search subStr in every line and note the index
-                if (str.ToLower().Contains(subStr.ToLower()))
+                if (str.data.ToLower().Contains(subStr.ToLower()))
                 {
-                    result.Add(str);
+                    result.Add(str.data);
                     break;
                 }
                 indexOfres++;
@@ -149,20 +163,20 @@ namespace Prod_DDM_API.Classes
 
                 bool isBetween = false;
 
-                foreach (string str in this._csv)
+                foreach (CsvLine str in this._csv)
                 {
                     Console.WriteLine(str);
-                    if (str.ToLower().Contains(firstSub.ToLower()) && !isBetween)
+                    if (str.data.ToLower().Contains(firstSub.ToLower()) && !isBetween)
                     {
                         isBetween = true;
                     }
 
                     if (isBetween)
                     {
-                        _res.Add(str);
+                        _res.Add(str.data);
                     }
 
-                    if (str.ToLower().Contains(secondSub.ToLower()) && isBetween)
+                    if (str.data.ToLower().Contains(secondSub.ToLower()) && isBetween)
                     {
                         break;
                     }
@@ -206,10 +220,10 @@ namespace Prod_DDM_API.Classes
 
             //if (!this.CheckDBData(this._csv[0]))
             //{
-                foreach (string str in this._csv)
+                foreach (CsvLine str in this._csv)
                 {
 
-                    if (str.ToLower().Contains(_testdata_startStr.ToLower()) && !isBetween)
+                    if (str.data.ToLower().Contains(_testdata_startStr.ToLower()) && !isBetween)
                     {
                         isBetween = true;
                         _temp = new List<object>();
@@ -217,11 +231,11 @@ namespace Prod_DDM_API.Classes
 
                     if (isBetween)
                     {
-                        dynamic item = this.GetIndexOfSearch(str);
+                        dynamic item = this.GetIndexOfSearch(str.data);
                         _temp.Add(new { indexOf = item.indexOf, data = item.subStr });
                     }
 
-                    if (str.ToLower().Contains(_testdata_endStr.ToLower()) && isBetween)
+                    if (str.data.ToLower().Contains(_testdata_endStr.ToLower()) && isBetween)
                     {
                         isBetween = false;
                         _res.Add(_temp);
@@ -272,5 +286,61 @@ namespace Prod_DDM_API.Classes
             }
         }
 
+        public List<double> GetExecutionTime(dynamic res, string selector = null)
+        {
+            try
+            {
+                List<double> execTime = new List<double>();
+
+                if (res is List<CsvLine> stringList)
+                {
+                    List<CsvLine> tempList = stringList;
+                    foreach (CsvLine line in tempList)
+                    {
+                        if(line.GetExecTimeOfLine(selector) != 0)
+                        {
+                            execTime.Add(line.GetExecTimeOfLine(selector));
+                        }
+                    }
+                }
+                else if (res is CsvLine singleString)
+                {
+                    if (res.GetExecTimeOfLine(selector) != 0)
+                    {
+                        execTime.Add(res.GetExecTimeOfLine(selector));
+                    }
+                }
+
+                if (execTime.Count <= 0)
+                {
+                    throw new Exception($"No data with time found! The selector was {selector}");
+                }
+
+                return execTime;
+            }
+            catch (Exception err)
+            {
+                throw new FormatException(err.Message);
+            }
+        }
+
+        public object GetExecutionTimeWithSelectors(double[] avgArr)
+        {
+            double sum = 0;
+
+            foreach (var line in avgArr)
+            {
+                sum += line;
+            }
+
+            double avg = sum / avgArr.Length;
+
+            double miliseconds = sum * 1000;
+            double second = sum;
+            double minutes = second / 60;
+            double hours = minutes / 60;
+
+            return new { avg, execTime = new { miliseconds, second, minutes, hours }, count = avgArr.Length, values = avgArr };
+        }
     }
 }

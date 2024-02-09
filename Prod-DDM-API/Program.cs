@@ -7,7 +7,7 @@ using SharpCompress.Crypto;
 using System.Xml.Linq;
 
 using Prod_DDM_API.Classes;
-using Microsoft.AspNetCore.Mvc;
+using Prod_DDM_API.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,15 +41,49 @@ app.MapGet("/", () =>
 });
 
 
+app.MapGet("/csv/latest/count", () =>
+{
+    return hRC.HandleErrors(() =>
+    {
+        CsvLoader loader = new CsvLoader("./data/csv/testdata.csv");
+
+        return loader.GetCsvLines().Count;
+    });
+});
+
+
 app.MapGet("/csv/latest/datetime", () =>
 {
     return hRC.HandleErrors(() =>
     {
-        CsvLoader loader = new CsvLoader("C:/vsc/_BLJ/Prod-DDM-API/Prod-DDM-API/data/csv/testdata.csv");
+        CsvLoader loader = new CsvLoader("./data/csv/testdata.csv");
 
         return loader.GetCreationTime();
     });
 });
+
+
+app.MapGet("/csv/recent/timeline", () =>
+{
+    return hRC.HandleErrors(() =>
+    {
+        CsvLoader loader = new CsvLoader("./data/csv/testdata2.csv");
+
+        List<object> list = new List<object>();
+
+        object timeline = loader.GetTimeline();
+
+        object all = loader.GetExecutionTimeWithSelectors(loader.GetExecutionTime(loader.GetCsvLines()).ToArray());
+
+        foreach(var key in Config.CSVDataKeyConfig)
+        {
+            list.Add( new { key, value = loader.GetExecutionTimeWithSelectors(loader.GetExecutionTime(loader.GetCsvLines(), key).ToArray())});
+        }
+
+        return new { timeline, execTimeline = new { all, sorted = list } };
+    });
+});
+
 
 
 app.Run();
