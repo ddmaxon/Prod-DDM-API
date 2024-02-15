@@ -111,7 +111,7 @@ app.MapGet("/csv/tests/proofedornot", () =>
 {
     return hRC.HandleErrors(() =>
     {
-        FileController loader = new FileController("./data/csv/testdata2.csv");
+        FileController loader = new FileController("./data/csv/testdata.csv");
 
         return loader.GetFilteredTests(loader.SearchSubstringInCsv("_TS_Execution"));
     });

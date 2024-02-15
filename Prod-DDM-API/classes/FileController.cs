@@ -177,6 +177,8 @@ namespace Prod_DDM_API.Classes
                 csvLines.Add(csvTests[i]);
             }
 
+            csvLines.Reverse();
+
             return csvLines;
         }
         public List<CsvLine> GetFilteredTests2(List<List<CsvLine>> csvTests)
