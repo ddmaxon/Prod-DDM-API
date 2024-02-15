@@ -1,20 +1,25 @@
-﻿namespace Prod_DDM_API.types
+﻿namespace Prod_DDM_API.Types
 {
     public class CsvLine
     {
         public string data { get; set; }
         public int index { get; set; }
         public string parentCsv { get; set; }
+        public DateTime date { get; set; }
 
         public CsvLine(string data)
         {
             this.data = data;
+
+            this.init();
         }
 
         public CsvLine(string data, int index)
         {
             this.data = data;
             this.index = index;
+            
+            this.init();
         }
 
         public CsvLine(string data, string parentCsv, int index)
@@ -22,6 +27,13 @@
             this.index = index;
             this.parentCsv = parentCsv;
             this.data = data;
+
+            this.init();
+        }
+
+        private void init()
+        {
+            this.date = DateTime.Parse(this.SplitList()[0]);
         }
 
         public string[] SplitList()
