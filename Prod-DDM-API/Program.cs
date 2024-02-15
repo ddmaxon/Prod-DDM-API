@@ -41,9 +41,7 @@ app.UseSwaggerUI(c =>
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Prod DDM API");
 });
 
-
 HttpResponseController hRC = new HttpResponseController();
-
 
 app.MapGet("/", () =>
 {
@@ -53,8 +51,6 @@ app.MapGet("/", () =>
     // Setze den MIME-Typ auf "text/html"
     return Results.Content(html, "text/html");
 });
-
-
 app.MapGet("/csv/latest/count", () =>
 {
     return hRC.HandleErrors(() =>
@@ -64,8 +60,6 @@ app.MapGet("/csv/latest/count", () =>
         return loader.GetCsvLines().Count;
     });
 });
-
-
 app.MapGet("/csv/latest/datetime", () =>
 {
     return hRC.HandleErrors(() =>
@@ -75,8 +69,6 @@ app.MapGet("/csv/latest/datetime", () =>
         return loader.GetCreationTime();
     });
 });
-
-
 app.MapGet("/csv/recent/timeline", () =>
 {
     return hRC.HandleErrors(() =>
@@ -97,8 +89,6 @@ app.MapGet("/csv/recent/timeline", () =>
         return new { timeline, execTimeline = new { all, sorted = list } };
     });
 });
-
-
 app.MapGet("/csv/tests", () =>
 {
     return hRC.HandleErrors(() =>
@@ -108,8 +98,6 @@ app.MapGet("/csv/tests", () =>
         return loader.GetAllTests();
     });
 });
-
-
 app.MapGet("/csv/search/{substring}", (string substring) =>
 {
     return hRC.HandleErrors(() =>
@@ -119,8 +107,6 @@ app.MapGet("/csv/search/{substring}", (string substring) =>
         return loader.SearchSubstringInCsv(substring);
     });
 });
-
-
 app.MapGet("/csv/tests/proofedornot", () =>
 {
     return hRC.HandleErrors(() =>
@@ -130,8 +116,6 @@ app.MapGet("/csv/tests/proofedornot", () =>
         return loader.GetFilteredTests(loader.SearchSubstringInCsv("_TS_Execution"));
     });
 });
-
-
 app.MapGet("/csv/tests/proofedornot2", () =>
 {
     return hRC.HandleErrors(() =>

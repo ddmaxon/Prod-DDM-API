@@ -118,20 +118,6 @@ namespace Prod_DDM_API.Classes
 
             return fCOutput;
         }
-        public object GetTimeline()
-        {
-            DateTime initTime = this._csv[0].date;
-            DateTime latestTime = this._csv[this._csv.Count - 1].date;
-
-            // Berechne die Differenz zwischen initTime und latestTime
-            TimeSpan difference = initTime - latestTime;
-
-            return new { initTime, latestTime, difference };
-        }
-        public List<CsvLine> GetCsvLines()
-        {
-            return _csv;
-        }
         public CsvLine GetCsvLine(int lineNr)
         {
             try
@@ -177,6 +163,84 @@ namespace Prod_DDM_API.Classes
 
                 throw new Exception($"Something went wrong! We're working on it.");
             }
+        }
+        public List<CsvLine> GetFilteredTests(List<CsvLine> csvTests)
+        {
+            List<CsvLine> csvLines = new List<CsvLine>();
+
+            int testsCount = csvTests.Count / 6; // Wieso 6? in csvTests wurden pro test 6 lines eingenommen (von Levin abgezählt (von Hand :C (Mir geht es so schlecht ;C)))
+
+            csvTests.Reverse();
+
+            for (int i = 0; i < testsCount * 2; i += 2)
+            {
+                csvLines.Add(csvTests[i]);
+            }
+
+            return csvLines;
+        }
+        public List<CsvLine> GetFilteredTests2(List<List<CsvLine>> csvTests)
+        {
+            List<CsvLine> csvLines = new List<CsvLine>();
+
+            foreach (var line in csvTests)
+            {
+                line.ToArray();
+                csvLines.Add(line[line.Count() - 2]);
+            }
+
+            return csvLines;
+        }
+        public List<CsvLine> GetCsvLines()
+        {
+            return _csv;
+        }
+        public List<double> GetExecutionTime(dynamic res, string selector = null)
+        {
+            try
+            {
+                List<double> execTime = new List<double>();
+
+                if (res is List<CsvLine> stringList)
+                {
+                    List<CsvLine> tempList = stringList;
+                    foreach (CsvLine line in tempList)
+                    {
+                        if (line.GetExecTimeOfLine(selector) != 0)
+                        {
+                            execTime.Add(line.GetExecTimeOfLine(selector));
+                        }
+                    }
+                }
+                else if (res is CsvLine singleString)
+                {
+                    if (res.GetExecTimeOfLine(selector) != 0)
+                    {
+                        execTime.Add(res.GetExecTimeOfLine(selector));
+                    }
+                }
+
+                if (execTime.Count <= 0)
+                {
+                    throw new Exception($"No data with time found! The selector was {selector}");
+                }
+
+                return execTime;
+            }
+            catch (Exception err)
+            {
+                throw new FormatException(err.Message);
+            }
+        }
+        public object GetTimeline()
+        {
+            DateTime initTime = this._csv[0].date;
+            DateTime latestTime = this._csv[this._csv.Count - 1].date;
+
+            // Berechne die Differenz zwischen initTime und latestTime
+            TimeSpan difference = initTime - latestTime;
+
+            return new { initTime, latestTime, difference };
         }
         public object GetIndexOfSearch(string subStr)
         {
@@ -295,43 +359,6 @@ namespace Prod_DDM_API.Classes
                 testCount = _res.Count
             };
         }
-        public List<double> GetExecutionTime(dynamic res, string selector = null)
-        {
-            try
-            {
-                List<double> execTime = new List<double>();
-
-                if (res is List<CsvLine> stringList)
-                {
-                    List<CsvLine> tempList = stringList;
-                    foreach (CsvLine line in tempList)
-                    {
-                        if (line.GetExecTimeOfLine(selector) != 0)
-                        {
-                            execTime.Add(line.GetExecTimeOfLine(selector));
-                        }
-                    }
-                }
-                else if (res is CsvLine singleString)
-                {
-                    if (res.GetExecTimeOfLine(selector) != 0)
-                    {
-                        execTime.Add(res.GetExecTimeOfLine(selector));
-                    }
-                }
-
-                if (execTime.Count <= 0)
-                {
-                    throw new Exception($"No data with time found! The selector was {selector}");
-                }
-
-                return execTime;
-            }
-            catch (Exception err)
-            {
-                throw new FormatException(err.Message);
-            }
-        }
         public object GetExecutionTimeWithSelectors(double[] avgArr)
         {
             double sum = 0;
@@ -349,33 +376,6 @@ namespace Prod_DDM_API.Classes
             double hours = minutes / 60;
 
             return new { avg, execTime = new { miliseconds, second, minutes, hours }, count = avgArr.Length, values = avgArr };
-        }
-        public List<CsvLine> GetFilteredTests(List<CsvLine> csvTests) 
-        {
-            List<CsvLine> csvLines = new List<CsvLine>();
-
-            int testsCount = csvTests.Count / 6; // Wieso 6? in csvTests wurden pro test 6 lines eingenommen (von Levin abgezählt (von Hand :C (Mir geht es so schlecht ;C)))
-
-            csvTests.Reverse();
-
-            for (int i = 0; i < testsCount * 2; i += 2)
-            {
-                csvLines.Add(csvTests[i]);
-            }
-
-            return csvLines;
-        }
-        public List<CsvLine> GetFilteredTests2(List<List<CsvLine>> csvTests)
-        {
-            List<CsvLine> csvLines = new List<CsvLine>();
-
-            foreach(var line in csvTests)
-            {
-                line.ToArray();
-                csvLines.Add(line[line.Count() - 2]);
-            }
-
-            return csvLines;
         }
     }
 }
