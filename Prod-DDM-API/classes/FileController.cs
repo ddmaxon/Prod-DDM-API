@@ -157,10 +157,7 @@ namespace Prod_DDM_API.Classes
                     {
                         dynamic item = this.GetIndexOfSearch(str.data);
 
-                        CsvLine c = new CsvLine(str.data);
-                        c.index = item.indexOf;
-
-                        result.Add(c);
+                        result.Add(str);
                     }
                 }
 
@@ -183,7 +180,7 @@ namespace Prod_DDM_API.Classes
         }
         public object GetIndexOfSearch(string subStr)
         {
-            List<string> result = new List<string>();
+            List<CsvLine> result = new List<CsvLine>();
             var indexOfres = 0;
 
             foreach (CsvLine str in this._csv)
@@ -191,7 +188,7 @@ namespace Prod_DDM_API.Classes
                 // search subStr in every line and note the index
                 if (str.data.ToLower().Contains(subStr.ToLower()))
                 {
-                    result.Add(str.data);
+                    result.Add(str);
                     break;
                 }
                 indexOfres++;
@@ -209,13 +206,12 @@ namespace Prod_DDM_API.Classes
         {
             try
             {
-                List<string> _res = new List<string>();
+                List<CsvLine> _res = new List<CsvLine>();
 
                 bool isBetween = false;
 
                 foreach (CsvLine str in this._csv)
                 {
-                    Console.WriteLine(str);
                     if (str.data.ToLower().Contains(firstSub.ToLower()) && !isBetween)
                     {
                         isBetween = true;
@@ -223,7 +219,7 @@ namespace Prod_DDM_API.Classes
 
                     if (isBetween)
                     {
-                        _res.Add(str.data);
+                        _res.Add(str);
                     }
 
                     if (str.data.ToLower().Contains(secondSub.ToLower()) && isBetween)
@@ -282,10 +278,7 @@ namespace Prod_DDM_API.Classes
                 {
                     dynamic item = this.GetIndexOfSearch(str.data);
 
-                    CsvLine c = new CsvLine(str.data);
-                    c.index = item.indexOf;
-
-                    _temp.Add(c);
+                    _temp.Add(str);
                 }
 
                 if (str.data.ToLower().Contains(_testdata_endStr.ToLower()) && isBetween)
@@ -361,7 +354,7 @@ namespace Prod_DDM_API.Classes
         {
             List<CsvLine> csvLines = new List<CsvLine>();
 
-            int testsCount = csvTests.Count / 6; // Wieso 7? in csvTests wurden pro test 7 lines eingenommen (von Levin abgezählt (von Hand :C (Mir geht es so schlecht ;C)))
+            int testsCount = csvTests.Count / 6; // Wieso 6? in csvTests wurden pro test 6 lines eingenommen (von Levin abgezählt (von Hand :C (Mir geht es so schlecht ;C)))
 
             csvTests.Reverse();
 
