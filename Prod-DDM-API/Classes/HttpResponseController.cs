@@ -5,7 +5,9 @@ namespace Prod_DDM_API.Classes
 {
     public class HttpResponseController
     {
-        // Handle errors for API Routes
+        /**
+         * Function to handle errors and return the response to the client
+         */
         public object HandleErrors(Func<object> method)
         {
             try
@@ -25,7 +27,9 @@ namespace Prod_DDM_API.Classes
             }
         }
 
-        // Parse every Exception into a http error code
+        /**
+         * Function to parse the c# error to http-error-code
+         */
         public int ParseErrorCode(Exception exception)
         {
             // Standard-HTTP-Errorcode
