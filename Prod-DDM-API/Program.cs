@@ -29,6 +29,8 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddControllers().AddNewtonsoftJson();
+
 var app = builder.Build();
 
 // Use Cors for origin
@@ -73,7 +75,7 @@ app.MapGet("/csv/recent/timeline", () =>
 {
     return hRC.HandleErrors(() =>
     {
-        FileController loader = new FileController("./data/csv/testdata.csv");
+        FileController loader = new FileController("./data/csv/testdata2.csv");
 
         List<object> list = new List<object>();
 
@@ -127,5 +129,26 @@ app.MapGet("/csv/tests/proofedornot2", () =>
         return loader.GetFilteredTests2(tests.data);
     });
 });
+app.MapGet("/csv/tests/dbinsert", () =>
+{
+    return hRC.HandleErrors(() =>
+    {
+        FileController loader = new FileController("./data/csv/testdata.csv");
+
+        return loader.testInsert();
+    });
+});
+app.MapGet("/csv/tests/dbselect", () =>
+{
+    return hRC.HandleErrors(() =>
+    {
+        FileController loader = new FileController("./data/csv/testdata2.csv");
+
+        return loader.testSelect();
+    });
+});
+
+
+
 
 app.Run();

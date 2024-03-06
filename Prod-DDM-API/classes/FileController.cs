@@ -16,7 +16,7 @@ namespace Prod_DDM_API.Classes
         private string _file_path;
 
 
-        private Storage _storage; 
+        private StorageController _storage; 
         private FileInfo _file; 
         private List<CsvLine> _csv;
         private DateTime _creation_time;
@@ -25,7 +25,7 @@ namespace Prod_DDM_API.Classes
         public FileController(string csvPath = "./")
         {
             this._csv = new List<CsvLine>();
-            this._storage = new Storage();
+            this._storage = new StorageController();
 
             this._file_path = csvPath;
 
@@ -413,6 +413,16 @@ namespace Prod_DDM_API.Classes
             string pTime; // TODO ??
             float progress; // TODO ??
             string message = status; // difference to status??
+        }
+
+        public StorageOutput testInsert()
+        {
+            return this._storage.InsertFile(this);
+        }
+
+        public StorageOutput testSelect()
+        {
+            return this._storage.GetFiles();
         }
     }
 }

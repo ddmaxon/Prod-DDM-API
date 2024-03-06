@@ -16,7 +16,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.27" />
     <PackageReference Include="MongoDB.Driver" Version="2.23.1" />
+    <PackageReference Include="MySql.Data" Version="8.3.0" />
     <PackageReference Include="SharpCompress" Version="0.36.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
