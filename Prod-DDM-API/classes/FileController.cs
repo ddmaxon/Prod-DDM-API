@@ -1,6 +1,7 @@
 ﻿using Prod_DDM_API.Classes.Db;
 using Prod_DDM_API.Data;
 using Prod_DDM_API.Types;
+using Prod_DDM_API.Types.History;
 using System.Data;
 using System.IO;
 
@@ -378,6 +379,40 @@ namespace Prod_DDM_API.Classes
             double hours = minutes / 60;
 
             return new { avg, execTime = new { miliseconds, second, minutes, hours }, count = avgArr.Length, values = avgArr };
+        }
+
+        public void CreateHistory(){
+            HistoryFileData history = new HistoryFileData();
+
+            history.id = ""; // TODO
+            history.name = Path.GetFileName(_file_path);
+
+            history.values.testData.testCount = 0; // TODO
+            history.values.testData.testPass = 0; // TODO
+            history.values.testData.testFail = 0; // TODO
+            history.values.testData.testPassRate = 100 / history.values.testData.testCount * history.values.testData.testPass; 
+
+            /*string[] tests = new string[4]; // per test found in file, new test-object
+            // test-object array/list? 
+            tests[0]; // name
+            tests[1]; // result
+            tests[2]; // time 
+            tests[3]; // vals=motvoltage,etc */
+
+            string date = this._creation_time.ToString("yyyy-MM-dd");
+            string time = this._creation_time.ToString("HH:mm:ss"); 
+            string type = Path.GetExtension(_file_path); // csv = MotTestLog ; others = undefined
+            string size = $"{((double)this._file.Length / (1024 * 1024)):F2}MB";
+            string status; 
+            if (testPass + testFail == testCount){ 
+                status = "Finished";
+            }
+            else{
+                status = "Airing";
+            } 
+            string pTime; // TODO ??
+            float progress; // TODO ??
+            string message = status; // difference to status??
         }
     }
 }
