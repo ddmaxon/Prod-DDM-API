@@ -151,7 +151,15 @@ app.MapGet("/csv/tests/dbselect", () =>
         return loader.testSelect();
     });
 });
+app.MapGet("/csv/tests/getvalues", () =>
+{
+    return hRC.HandleErrors(() =>
+    {
+        FileController loader = new FileController("./Data/Csv/testdata.csv");
 
+        return loader.GetTestsWithValues();
+    });
+});
 
 
 

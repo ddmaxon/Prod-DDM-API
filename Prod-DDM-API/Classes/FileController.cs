@@ -454,33 +454,74 @@ namespace Prod_DDM_API.Classes
             return this._storage.GetFiles();
         }
 
-        public List<HistoryTests> GetTestsWithVals()
+        public List<HistoryTests> GetTestsWithValues()
         {
             List<HistoryTests> result = new List<HistoryTests>();
+            Console.WriteLine("skipped list init...");
             
             dynamic tests = this.GetAllTests();
 
-            List<List<CsvLine>> rowWVals = new List<List<CsvLine>>();
+
+            HistoryTests hTest;
             
-            List<CsvLine> temp;
-            
-            foreach (List<CsvLine> test in tests)
+            Console.WriteLine("skipped second list init...");
+
+            int index = 1;
+            foreach (List<CsvLine> test in tests.data)
             {
-                temp = new List<CsvLine>();
+                hTest = new HistoryTests();
+
+                bool isFailed = false;
+                
+                Console.WriteLine("skipped first foreach init...");
                 foreach (CsvLine row in test)
                 {
+                    Console.WriteLine("skipped second foreach init...");
                     foreach (string key in Config.CSVDataConfig)
                     {
+                        Console.WriteLine("skipped third foreach init...");
                         if (row.data.Contains(key))
                         {
-                            temp.Add(row);
+                            HistoryTestsValue hTestVal = new HistoryTestsValue();
+
+                            hTestVal.key = key;
+                            hTestVal.value = row.data;
+                            
+                            hTest.vals.Add(hTestVal);
+
+                            if (row.data.ToLower().Contains("failed"))
+                            {
+                                isFailed = true;
+                            }
                         }
                     }
                 }
-                rowWVals.Add(temp);
+                //Create test name for test
+                hTest.name = $"Test {index}";
+                
+                //Set exec time for test
+                DateTime initTime = test[0].date;
+                test.Reverse();
+                DateTime endTime = test[0].date;
+                
+                hTest.time = endTime - initTime;
+                
+                //Set result
+                if (isFailed)
+                {
+                    hTest.result = "Failed";
+                }
+                else
+                {
+                    hTest.result = "Pass";
+                }
+                
+                //Add hTest to result
+                result.Add(hTest);
+                
+                //Add 1 to index
+                index++;
             }
-            
-            
             
             return result;
         }

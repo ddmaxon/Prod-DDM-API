@@ -4,6 +4,7 @@ namespace Prod_DDM_API.Types.History
     {
         public string name { get; set; }
         public string result { get; set; }
-        public DateTime time { get; set; }
+        public TimeSpan time { get; set; }
+        public List<HistoryTestsValue> vals { get; set; }
     }
 }
