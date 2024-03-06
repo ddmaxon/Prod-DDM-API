@@ -383,36 +383,45 @@ namespace Prod_DDM_API.Classes
 
         public void CreateHistory(){
             HistoryFileData history = new HistoryFileData();
+            Storage db = new Storage();
+            db.ConnectDB();
+            history.name = Path.GetFileName(_file_path);
+            db.execR($"SELECT COUNT(*) AS entryCount FROM {history.name} WHERE column4 = 'Start: ';"); // TODO check; for testCount
 
             history.id = ""; // TODO
-            history.name = Path.GetFileName(_file_path);
+            
 
-            history.values.testData.testCount = 0; // TODO
-            history.values.testData.testPass = 0; // TODO
-            history.values.testData.testFail = 0; // TODO
+            history.values.testData.testCount = 0; // TODO, db abfrage...
+            history.values.testData.testPass = 0; // TODO, db abfrage...
+            history.values.testData.testFail = 0; // TODO, db abfrage...
             history.values.testData.testPassRate = 100 / history.values.testData.testCount * history.values.testData.testPass; 
 
-            /*string[] tests = new string[4]; // per test found in file, new test-object
-            // test-object array/list? 
-            tests[0]; // name
-            tests[1]; // result
-            tests[2]; // time 
-            tests[3]; // vals=motvoltage,etc */
+            // history.values.testData.tests[0] = ""; // name TODO
+            // history.values.testData.tests[1] = ""; // result TODO
+            // history.values.testData.tests[2] = ; // time TODO
+            // history.values.testData.tests[3] = ""; // vals=motVoltage, etc.. 
 
-            string date = this._creation_time.ToString("yyyy-MM-dd");
-            string time = this._creation_time.ToString("HH:mm:ss"); 
-            string type = Path.GetExtension(_file_path); // csv = MotTestLog ; others = undefined
-            string size = $"{((double)this._file.Length / (1024 * 1024)):F2}MB";
-            string status; 
-            if (testPass + testFail == testCount){ 
-                status = "Finished";
+            // history.values.date = this._creation_time.ToString("yyyy-MM-dd"); // TODO
+            // history.values.time = this._creation_time.ToString("HH:mm:ss"); // TODO
+            string fileExt = Path.GetExtension(_file_path); // TODO check
+            if (fileExt == ".csv"){
+                history.values.type = "csv (MotTestLog)";
             }
-            else{
-                status = "Airing";
+            else {
+                history.values.type = "undefined";
+            }
+            history.values.size = $"{((double)this._file.Length / (1024 * 1024)):F2}MB"; // TODO check
+            if (history.values.testData.testPass + history.values.testData.testFail == history.values.testData.testCount){ 
+                history.values.process.status = "Finished";
+            }
+            else {
+                history.values.process.status = "Airing";
             } 
-            string pTime; // TODO ??
-            float progress; // TODO ??
-            string message = status; // difference to status??
+            // history.values.process.time = ""; // TODO
+            history.values.process.progress = 100 / history.values.testData.testCount * (history.values.testData.testPass + history.values.testData.testFail); 
+            history.values.process.message = ""; // leave empty
+
+            db.DisconectDB();
         }
 
         public StorageOutput testInsert()
