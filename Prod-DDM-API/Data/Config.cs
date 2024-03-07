@@ -5,7 +5,7 @@
         /*
          CSV Data Config
          */
-        public static readonly string[] CSVDataConfig = { "sCw_MotCurrent<mA>", "sCw_MotVoltage<V>", "sCw_MotSpeed<rpm>", "sCw_MotCurrent<mA>", "_MotComAngleOffset<degEl>", "_MotComAngleDelay<degEl>" };
+        public static readonly string[] CSVDataConfig = { "MotCurrent<mA>", "MotVoltage<V>", "MotSpeed<rpm>", "MotCurrent<mA>", "MotComAngleOffset<degEl>", "MotComAngleDelay<degEl>" };
         public static readonly string[] CSVDataKeyConfig = { "DB", "I", "Q 'DB'", "Q 'SM'", "Q 'HW'" };
 
         /*
