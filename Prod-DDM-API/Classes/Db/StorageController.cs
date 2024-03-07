@@ -232,7 +232,7 @@ namespace Prod_DDM_API.Classes.Db
                 //Disconnect DB
                 this._db.DisconnectDb();
 
-                return this.GetOutput(200, "Files successfully readed!", files, 0);
+                return this.GetOutput(200, "Files successfully read!", files, 0);
             }
             catch (Exception err)
             {
@@ -270,12 +270,40 @@ namespace Prod_DDM_API.Classes.Db
                 //Disconnect DB
                 this._db.DisconnectDb();
 
-                return this.GetOutput(200, "Files successfully readed!", files, 0);
+                return this.GetOutput(200, "Files successfully read!", files, 0);
             }
             catch (Exception err)
             {
                 return this.GetOutput(500, err.Message);
             }
         }
+        public StorageOutput GetTestPassed()
+        {
+            try
+            {
+                //Connect to DB
+                this._db.ConnectDb();
+
+                MySqlDataReader reader = this._db.execR("SELECT COUNT(*) FROM ddm_files WHERE message LIKE '%passed%'");
+
+                int passedTestsCount = 0;
+
+                //Read the data and count the rows containing "passed"
+                if (reader.Read()){
+                    passedTestsCount = reader.GetInt32(0);
+                }
+
+                reader.Close();
+
+                //Disconnect DB
+                this._db.DisconnectDb();
+
+                return this.GetOutput(200, "Files successfully read!", passedTestsCount, 0);
+            }
+            catch (Exception err)
+            {
+                return this.GetOutput(500, err.Message);
+            }
+        } 
     }
 }

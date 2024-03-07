@@ -160,7 +160,14 @@ app.MapGet("/csv/tests/getvalues", () =>
         return loader.GetTestsWithValues();
     });
 });
+app.MapGet("/csv/latest/gethistory", () =>
+{
+    return hRC.HandleErrors(() =>
+    {
+        FileController loader = new FileController("./Data/Csv/testdata.csv");
 
-
+        return loader.CreateHistory();
+    });
+});
 
 app.Run();

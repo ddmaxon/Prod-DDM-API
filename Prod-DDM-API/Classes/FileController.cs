@@ -381,17 +381,19 @@ namespace Prod_DDM_API.Classes
             return new { avg, execTime = new { miliseconds, second, minutes, hours }, count = avgArr.Length, values = avgArr };
         }
 
-        public void CreateHistory(){
+        public StorageOutput CreateHistory(){
             HistoryFileData history = new HistoryFileData();
-
+            
+            /*
             history.name = Path.GetFileName(_file_path);
 
             history.id = ""; // TODO
             
-
             history.values.testData.testCount = 0; // TODO, db abfrage...
+            */
             history.values.testData.testPass = 0; // TODO, db abfrage...
             history.values.testData.testFail = 0; // TODO, db abfrage...
+            /*
             history.values.testData.testPassRate = 100 / history.values.testData.testCount * history.values.testData.testPass; 
 
             // history.values.testData.tests[0] = ""; // name TODO
@@ -418,7 +420,9 @@ namespace Prod_DDM_API.Classes
             // history.values.process.time = ""; // TODO
             history.values.process.progress = 100 / history.values.testData.testCount * (history.values.testData.testPass + history.values.testData.testFail); 
             history.values.process.message = ""; // leave empty
+            */
 
+            return this._storage.GetTestPassed();
         }
 public List<HistoryTests> GetTestsWithValues()
         {
