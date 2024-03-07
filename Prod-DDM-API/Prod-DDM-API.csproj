@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="data\output\" />
+    <Folder Include="Data\output\" />
   </ItemGroup>
 
 </Project>

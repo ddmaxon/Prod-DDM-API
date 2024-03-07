@@ -383,10 +383,8 @@ namespace Prod_DDM_API.Classes
 
         public void CreateHistory(){
             HistoryFileData history = new HistoryFileData();
-            Storage db = new Storage();
-            db.ConnectDB();
+
             history.name = Path.GetFileName(_file_path);
-            db.execR($"SELECT COUNT(*) AS entryCount FROM {history.name} WHERE column4 = 'Start: ';"); // TODO check; for testCount
 
             history.id = ""; // TODO
             
@@ -421,7 +419,6 @@ namespace Prod_DDM_API.Classes
             history.values.process.progress = 100 / history.values.testData.testCount * (history.values.testData.testPass + history.values.testData.testFail); 
             history.values.process.message = ""; // leave empty
 
-            db.DisconectDB();
         }
 
         public StorageOutput testInsert()

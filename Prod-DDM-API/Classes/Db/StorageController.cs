@@ -62,7 +62,7 @@ namespace Prod_DDM_API.Classes.Db
                 string tCount = Convert.ToString(tests.testCount);
 
                 //Connect to the DB
-                this._db.ConnectDB();
+                this._db.ConnectDb();
 
                 // Execute the insert statement
                 this._db.execCUD($"INSERT INTO ddm_files (name, _creation_time, _file_path, _rows_count, _tests_count) VALUES ('{name}', '{cTime}', '{path}', '{rCount}', '{tCount}')");
@@ -73,7 +73,7 @@ namespace Prod_DDM_API.Classes.Db
                 this.InsertRows(rows, int.Parse(parent[0].id), true);
 
                 //Disconnect DB
-                this._db.DisconectDB();
+                this._db.DisconnectDb();
 
                 // Return a response
                 return this.GetOutput(200, $"File {name} successfully inserted into the db!");
@@ -85,13 +85,11 @@ namespace Prod_DDM_API.Classes.Db
                 return this.GetOutput(500, err.Message);
             }
         }
-
         private List<SqlFileOutput> GetParentFiles(string name)
         {
             StorageOutput parent = GetFileByName(name);
             return (List<SqlFileOutput>)parent.data;
         }
-
         public StorageOutput InsertRow(CsvLine row)
         {
             try
@@ -124,13 +122,13 @@ namespace Prod_DDM_API.Classes.Db
                 int _index = row.index;
 
                 //Connect to DB
-                this._db.ConnectDB();
+                this._db.ConnectDb();
 
                 // Execute the insert statemet
                 this._db.execCUD($"INSERT INTO ddm_rows (fileid, date, section, exec_file, message, _index) VALUES ({fileid}, '{date}', '{section}', '{exec_file}', '{message}', {_index})");
 
                 //Disconect DB
-                this._db.DisconectDB();
+                this._db.DisconnectDb();
 
                 // Return a response
                 return this.GetOutput(200, $"Row {_index} successfully inserted into the db!");
@@ -146,7 +144,7 @@ namespace Prod_DDM_API.Classes.Db
             try
             {
                 //Connect to DB
-                this._db.ConnectDB();
+                this._db.ConnectDb();
 
                 List<string> values = new List<string>();
 
@@ -185,7 +183,7 @@ namespace Prod_DDM_API.Classes.Db
                 this._db.execCUD($"INSERT INTO ddm_rows (fileid, date, section, exec_file, message, _index) VALUES {string.Join(", ", values)};");
 
                 // Disconnect DB
-                this._db.DisconectDB();
+                this._db.DisconnectDb();
 
                 // Return a response
                 return this.GetOutput(200, $"All files successfully inserted into the db!");
@@ -208,7 +206,7 @@ namespace Prod_DDM_API.Classes.Db
             try
             {
                 //Connect to DB
-                this._db.ConnectDB();
+                this._db.ConnectDb();
 
                 MySqlDataReader reader = this._db.execR($"SELECT * FROM ddm_files where name like '%{name}%'");
 
@@ -232,7 +230,7 @@ namespace Prod_DDM_API.Classes.Db
                 reader.Close();
 
                 //Disconnect DB
-                this._db.DisconectDB();
+                this._db.DisconnectDb();
 
                 return this.GetOutput(200, "Files successfully readed!", files, 0);
             }
@@ -246,7 +244,7 @@ namespace Prod_DDM_API.Classes.Db
             try
             {
                 //Connect to DB
-                this._db.ConnectDB();
+                this._db.ConnectDb();
 
                 MySqlDataReader reader = this._db.execR("SELECT * FROM ddm_files");
 
@@ -270,7 +268,7 @@ namespace Prod_DDM_API.Classes.Db
                 reader.Close();
 
                 //Disconnect DB
-                this._db.DisconectDB();
+                this._db.DisconnectDb();
 
                 return this.GetOutput(200, "Files successfully readed!", files, 0);
             }

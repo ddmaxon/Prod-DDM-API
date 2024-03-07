@@ -21,7 +21,7 @@ namespace Prod_DDM_API.Classes.Db
         //DB Logs
         private void WriteLog(int status, string query)
         {
-            string logFilePath = "C:\\vsc\\_BLJ\\Prod-DDM-API\\Prod-DDM-API\\data\\logs\\sql-log.log";
+            string logFilePath = "C:\\vsc\\_BLJ\\Prod-DDM-API\\Prod-DDM-API\\data\\Logs\\sql-log.log";
             string logDirectory = Path.GetDirectoryName(logFilePath);
 
             // Überprüfen und erstellen Sie das Protokollverzeichnis, falls es nicht existiert
@@ -46,12 +46,14 @@ namespace Prod_DDM_API.Classes.Db
                 throw new Exception(logMessage, ex);
             }
         }
+        //DB error comparison
         private string CompareQueryXErr(string err, string query)
         {
             query = this.CheckQuerySize(query);
             
             return err + " | " + query;
         }
+        //DB query size adjustment
         private string CheckQuerySize(string query)
         {
             int maxLenght = 100;
@@ -78,7 +80,7 @@ namespace Prod_DDM_API.Classes.Db
             this.connection = new MySqlConnection(connectionString);
         }
         //Public connect function
-        public void ConnectDB()
+        public void ConnectDb()
         {
             if (!this.CheckConnection())
             {
@@ -88,7 +90,7 @@ namespace Prod_DDM_API.Classes.Db
             }
         }
         //Public disconect function
-        public void DisconectDB()
+        public void DisconnectDb()
         {
             if (this.CheckConnection())
             {
