@@ -4,6 +4,8 @@ using Prod_DDM_API.Types;
 using Prod_DDM_API.Types.History;
 using System.Data;
 using System.IO;
+using MongoDB.Bson;
+using MySqlX.XDevAPI.Common;
 
 namespace Prod_DDM_API.Classes
 {
@@ -16,12 +18,12 @@ namespace Prod_DDM_API.Classes
         private string _file_path;
 
 
-        private StorageController _storage; 
-        private FileInfo _file; 
+        private StorageController _storage;
+        private FileInfo _file;
         private List<CsvLine> _csv;
         private DateTime _creation_time;
 
-         
+
         public FileController(string csvPath = "./")
         {
             this._csv = new List<CsvLine>();
@@ -38,6 +40,7 @@ namespace Prod_DDM_API.Classes
         {
             this._file_path = newpath;
         }
+
         public void loadCsv()
         {
             var indexOfres = 1;
@@ -55,16 +58,19 @@ namespace Prod_DDM_API.Classes
                 }
             }
         }
+
         public FileInfo GetFileInfo()
         {
             FileInfo oFileInfo = new FileInfo(this._file_path);
 
             return oFileInfo;
         }
+
         public DateTime GetCreationTime()
         {
             return this._file.CreationTime;
         }
+
         public FCOutput transportToOutput(string name = null)
         {
             if (name == null)
@@ -81,7 +87,9 @@ namespace Prod_DDM_API.Classes
                 {
                     // This statement ensures that the file is created,
                     // but the handle is not kept.
-                    using (FileStream fs = File.Create(inputPath)) { }
+                    using (FileStream fs = File.Create(inputPath))
+                    {
+                    }
                 }
 
                 // Ensure that the target does not exist.
@@ -96,7 +104,8 @@ namespace Prod_DDM_API.Classes
                 // See if the original exists now.
                 if (File.Exists(inputPath))
                 {
-                    return GetFormatedOutput(outputPath, inputPath, "FileTransportToOutput", "The original file still exists, which is unexpected.");
+                    return GetFormatedOutput(outputPath, inputPath, "FileTransportToOutput",
+                        "The original file still exists, which is unexpected.");
                 }
                 else
                 {
@@ -105,10 +114,13 @@ namespace Prod_DDM_API.Classes
             }
             catch (Exception e)
             {
-                return GetFormatedOutput(outputPath, inputPath, "FileTransportToOutput", $"The process failed: {e.Message}");
+                return GetFormatedOutput(outputPath, inputPath, "FileTransportToOutput",
+                    $"The process failed: {e.Message}");
             }
         }
-        public FCOutput GetFormatedOutput(string newPath, string oldPath, string method, string message = "Method was successfully executed!")
+
+        public FCOutput GetFormatedOutput(string newPath, string oldPath, string method,
+            string message = "Method was successfully executed!")
         {
             FCOutput fCOutput = new FCOutput();
 
@@ -119,6 +131,7 @@ namespace Prod_DDM_API.Classes
 
             return fCOutput;
         }
+
         public CsvLine GetCsvLine(int lineNr)
         {
             try
@@ -130,6 +143,7 @@ namespace Prod_DDM_API.Classes
                 throw new IndexOutOfRangeException($"Out of range! Max range is {this._csv.Count()}");
             }
         }
+
         public List<CsvLine> SearchSubstringInCsv(string subStr = " ")
         {
             try
@@ -138,7 +152,6 @@ namespace Prod_DDM_API.Classes
 
                 foreach (CsvLine str in this._csv)
                 {
-
                     // search subStr in every line
                     if (str.data.ToLower().Contains(subStr.ToLower()))
                     {
@@ -165,11 +178,14 @@ namespace Prod_DDM_API.Classes
                 throw new Exception($"Something went wrong! We're working on it.");
             }
         }
+
         public List<CsvLine> GetFilteredTests(List<CsvLine> csvTests)
         {
             List<CsvLine> csvLines = new List<CsvLine>();
 
-            int testsCount = csvTests.Count / 6; // Wieso 6? in csvTests wurden pro test 6 lines eingenommen (von Levin abgezählt (von Hand :C (Mir geht es so schlecht ;C)))
+            int testsCount =
+                csvTests.Count /
+                6; // Wieso 6? in csvTests wurden pro test 6 lines eingenommen (von Levin abgezählt (von Hand :C (Mir geht es so schlecht ;C)))
 
             csvTests.Reverse();
 
@@ -182,6 +198,7 @@ namespace Prod_DDM_API.Classes
 
             return csvLines;
         }
+
         public List<CsvLine> GetFilteredTests2(List<List<CsvLine>> csvTests)
         {
             List<CsvLine> csvLines = new List<CsvLine>();
@@ -194,10 +211,12 @@ namespace Prod_DDM_API.Classes
 
             return csvLines;
         }
+
         public List<CsvLine> GetCsvLines()
         {
             return _csv;
         }
+
         public List<double> GetExecutionTime(dynamic res, string selector = null)
         {
             try
@@ -235,6 +254,7 @@ namespace Prod_DDM_API.Classes
                 throw new FormatException(err.Message);
             }
         }
+
         public object GetTimeline()
         {
             DateTime initTime = this._csv[0].date;
@@ -245,6 +265,7 @@ namespace Prod_DDM_API.Classes
 
             return new { initTime, latestTime, difference };
         }
+
         public object GetIndexOfSearch(string subStr)
         {
             List<CsvLine> result = new List<CsvLine>();
@@ -258,6 +279,7 @@ namespace Prod_DDM_API.Classes
                     result.Add(str);
                     break;
                 }
+
                 indexOfres++;
             }
 
@@ -269,6 +291,7 @@ namespace Prod_DDM_API.Classes
                 result
             };
         }
+
         public object GetDataBetween(string firstSub, string secondSub)
         {
             try
@@ -319,6 +342,7 @@ namespace Prod_DDM_API.Classes
                 throw new Exception(err.Message);
             }
         }
+
         public object GetAllTests()
         {
             string _testdata_startStr = "Start: \"DB_SaveResult\"";
@@ -334,7 +358,6 @@ namespace Prod_DDM_API.Classes
             //{
             foreach (CsvLine str in this._csv)
             {
-
                 if (str.data.ToLower().Contains(_testdata_startStr.ToLower()) && !isBetween)
                 {
                     isBetween = true;
@@ -362,6 +385,7 @@ namespace Prod_DDM_API.Classes
                 testCount = _res.Count
             };
         }
+
         public object GetExecutionTimeWithSelectors(double[] avgArr)
         {
             double sum = 0;
@@ -378,23 +402,26 @@ namespace Prod_DDM_API.Classes
             double minutes = second / 60;
             double hours = minutes / 60;
 
-            return new { avg, execTime = new { miliseconds, second, minutes, hours }, count = avgArr.Length, values = avgArr };
+            return new
+            {
+                avg, execTime = new { miliseconds, second, minutes, hours }, count = avgArr.Length, values = avgArr
+            };
         }
 
-        public StorageOutput CreateHistory(){
+        public void CreateHistory()
+        {
             HistoryFileData history = new HistoryFileData();
-            
-            /*
+
             history.name = Path.GetFileName(_file_path);
 
             history.id = ""; // TODO
-            
+
+
             history.values.testData.testCount = 0; // TODO, db abfrage...
-            */
             history.values.testData.testPass = 0; // TODO, db abfrage...
             history.values.testData.testFail = 0; // TODO, db abfrage...
-            /*
-            history.values.testData.testPassRate = 100 / history.values.testData.testCount * history.values.testData.testPass; 
+            history.values.testData.testPassRate =
+                100 / history.values.testData.testCount * history.values.testData.testPass;
 
             // history.values.testData.tests[0] = ""; // name TODO
             // history.values.testData.tests[1] = ""; // result TODO
@@ -404,57 +431,61 @@ namespace Prod_DDM_API.Classes
             // history.values.date = this._creation_time.ToString("yyyy-MM-dd"); // TODO
             // history.values.time = this._creation_time.ToString("HH:mm:ss"); // TODO
             string fileExt = Path.GetExtension(_file_path); // TODO check
-            if (fileExt == ".csv"){
+            if (fileExt == ".csv")
+            {
                 history.values.type = "csv (MotTestLog)";
             }
-            else {
+            else
+            {
                 history.values.type = "undefined";
             }
+
             history.values.size = $"{((double)this._file.Length / (1024 * 1024)):F2}MB"; // TODO check
-            if (history.values.testData.testPass + history.values.testData.testFail == history.values.testData.testCount){ 
+            if (history.values.testData.testPass + history.values.testData.testFail ==
+                history.values.testData.testCount)
+            {
                 history.values.process.status = "Finished";
             }
-            else {
+            else
+            {
                 history.values.process.status = "Airing";
-            } 
-            // history.values.process.time = ""; // TODO
-            history.values.process.progress = 100 / history.values.testData.testCount * (history.values.testData.testPass + history.values.testData.testFail); 
-            history.values.process.message = ""; // leave empty
-            */
+            }
 
-            return this._storage.GetTestPassed();
+            // history.values.process.time = ""; // TODO
+            history.values.process.progress = 100 / history.values.testData.testCount *
+                                              (history.values.testData.testPass + history.values.testData.testFail);
+            history.values.process.message = ""; // leave empty
         }
-public List<HistoryTests> GetTestsWithValues()
+
+        public List<HistoryTests> GetTestsWithValues()
         {
             try
-            { 
+            {
                 List<HistoryTests> result = new List<HistoryTests>();
                 dynamic tests = this.GetAllTests();
-                
+                tests = tests.data;
                 HistoryTests hTest;
                 
+                Console.WriteLine(tests);
+
                 int index = 1;
-                foreach (List<CsvLine> test in tests.data)
+                foreach (List<CsvLine> test in tests)
                 {
                     hTest = new HistoryTests();
                     hTest.vals = new List<HistoryTestsValue>();
+                    
+                    Console.WriteLine(hTest.ToJson());
 
                     bool isFailed = false;
                     bool hasVals = false;
-                    
-                    Console.WriteLine(test);
+
                     foreach (CsvLine row in test)
                     {
                         foreach (string key in Config.CSVDataConfig)
                         {
                             if (row.data.Contains(key))
                             {
-                                HistoryTestsValue hTestVal = new HistoryTestsValue();
-
-                                hTestVal.key = key;
-                                hTestVal.value = row.data;
-                                
-                                hTest.vals.Add(hTestVal);
+                                hTest.vals.Add(this.ConvertRowToHistoryTestsValue(row, key));
 
                                 if (row.data.ToLower().Contains("failed"))
                                 {
@@ -470,14 +501,14 @@ public List<HistoryTests> GetTestsWithValues()
                     {
                         //Create test name for test
                         hTest.name = $"Test {index}";
-                    
+
                         //Set exec time for test
                         DateTime initTime = test[0].date;
                         test.Reverse();
                         DateTime endTime = test[0].date;
-                    
+
                         hTest.time = endTime - initTime;
-                    
+
                         //Set result
                         if (isFailed)
                         {
@@ -487,15 +518,15 @@ public List<HistoryTests> GetTestsWithValues()
                         {
                             hTest.result = "Pass";
                         }
-                    
+
                         //Add hTest to result
                         result.Add(hTest);
-                    
+
                         //Add 1 to index
                         index++;
                     }
                 }
-                
+
                 return result;
             }
             catch (Exception e)
@@ -504,6 +535,40 @@ public List<HistoryTests> GetTestsWithValues()
                 throw;
             }
         }
+
+        private HistoryTestsValue ConvertRowToHistoryTestsValue(CsvLine row, string key)
+        {
+            HistoryTestsValue hTestVal = new HistoryTestsValue();
+
+            string message = row.SplitList()[3];
+            hTestVal.key = key;
+            
+
+            if (message.Contains(key))
+            {
+                List<HistoryTestsValueData> msg = new List<HistoryTestsValueData>();
+
+                //"... '...','...','...' --Successfully" => ["...", "'...','...','...'", "--Successfully"]
+                string[] msgArr = message.Split(" ");
+
+                //Split multivalues in middle of array ["...", "'...','...','...'", "--Successfully"] => ["'...'", "'...'", "'...'"]
+                string[] values = msgArr[2].Split(",");
+
+                HistoryTestsValueData data = new HistoryTestsValueData();
+                
+                data.max = values[12];
+                data.avg = values[11];
+                data.min = values[10];
+
+                //Set test results and give it to the client
+                hTestVal.value = data;
+                hTestVal.result = values[13];
+                hTestVal.id = values[8];
+            }
+            
+            return hTestVal;
+        }
+
         public StorageOutput testInsert()
         {
             return this._storage.InsertFile(this);
