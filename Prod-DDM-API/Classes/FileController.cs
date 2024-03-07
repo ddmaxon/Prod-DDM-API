@@ -420,7 +420,86 @@ namespace Prod_DDM_API.Classes
             history.values.process.message = ""; // leave empty
 
         }
+public List<HistoryTests> GetTestsWithValues()
+        {
+            try
+            { 
+                List<HistoryTests> result = new List<HistoryTests>();
+                dynamic tests = this.GetAllTests();
+                
+                HistoryTests hTest;
+                
+                int index = 1;
+                foreach (List<CsvLine> test in tests.data)
+                {
+                    hTest = new HistoryTests();
+                    hTest.vals = new List<HistoryTestsValue>();
 
+                    bool isFailed = false;
+                    bool hasVals = false;
+                    
+                    Console.WriteLine(test);
+                    foreach (CsvLine row in test)
+                    {
+                        foreach (string key in Config.CSVDataConfig)
+                        {
+                            if (row.data.Contains(key))
+                            {
+                                HistoryTestsValue hTestVal = new HistoryTestsValue();
+
+                                hTestVal.key = key;
+                                hTestVal.value = row.data;
+                                
+                                hTest.vals.Add(hTestVal);
+
+                                if (row.data.ToLower().Contains("failed"))
+                                {
+                                    isFailed = true;
+                                }
+
+                                hasVals = true;
+                            }
+                        }
+                    }
+
+                    if (hasVals)
+                    {
+                        //Create test name for test
+                        hTest.name = $"Test {index}";
+                    
+                        //Set exec time for test
+                        DateTime initTime = test[0].date;
+                        test.Reverse();
+                        DateTime endTime = test[0].date;
+                    
+                        hTest.time = endTime - initTime;
+                    
+                        //Set result
+                        if (isFailed)
+                        {
+                            hTest.result = "Failed";
+                        }
+                        else
+                        {
+                            hTest.result = "Pass";
+                        }
+                    
+                        //Add hTest to result
+                        result.Add(hTest);
+                    
+                        //Add 1 to index
+                        index++;
+                    }
+                }
+                
+                return result;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
         public StorageOutput testInsert()
         {
             return this._storage.InsertFile(this);
