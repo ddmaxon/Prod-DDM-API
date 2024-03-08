@@ -1,41 +1,39 @@
-# Prod-DDM-API
+#  !¡∷𝙹↸-↸↸ᒲ-ᔑ!¡╎
 
-## Description
+##  ↸ᒷᓭᓵ∷╎!¡ℸ ̣ ╎𝙹リ
 
-This is a simple API that handles the CRUD operations of logFiles for the Maxon Company.
+ℸ  ̣  ⍑╎ᓭ    ╎ᓭ    ᔑ    ᓭ╎ᒲ!¡ꖎᒷ    ᔑ!¡╎    ℸ  ̣  ⍑ᔑℸ  ̣      ⍑ᔑリ↸ꖎᒷᓭ    ℸ  ̣  ⍑ᒷ    ᓵ∷⚍↸    𝙹!¡ᒷ∷ᔑℸ  ̣  ╎𝙹リᓭ    𝙹⎓    ꖎ𝙹⊣⎓╎ꖎᒷᓭ    ⎓𝙹∷    ℸ  ̣  ⍑ᒷ    ᒲᔑ  ̇/𝙹リ    ᓵ𝙹ᒲ!¡ᔑリ||.
+##  ∷ᒷᑑ⚍╎∷ᒷᒲᒷリℸ ̣ ᓭ
 
-## Requirements
+-.リᒷℸ ̣   ᓵ𝙹∷ᒷ  6.0
 
-- .NET Core 6.0
+##  ╎リᓭℸ ̣ ᔑꖎꖎᔑℸ ̣ ╎𝙹リ
 
-## Installation
-
-### Clone the repository
+###  ᓵꖎ𝙹リᒷ  ℸ ̣ ⍑ᒷ  ∷ᒷ!¡𝙹ᓭ╎ℸ ̣ 𝙹∷||
 
 ```shell
 git clone https://github.com/ddmaxon/Prod-DDM-API.git
 cd Prod-DDM-API
 ```
 
-### Install the dependencies
-
+###  ╎リᓭℸ ̣ ᔑꖎꖎ  ℸ ̣ ⍑ᒷ  ↸ᒷ!¡ᒷリ↸ᒷリᓵ╎ᒷᓭ
 ```shell
 dotnet restore
 ```
 
-### Run the application
+###  ∷⚍リ  ℸ ̣ ⍑ᒷ  ᔑ!¡!¡ꖎ╎ᓵᔑℸ ̣ ╎𝙹リ
 
 ```shell
 dotnet run
 ```
 
-## Usage
+##  ⚍ᓭᔑ⊣ᒷ
 
-The API has the feature, to automatically search for the log-files in a defined folder.
+ℸ ̣ ⍑ᒷ  ᔑ!¡╎  ⍑ᔑᓭ  ℸ ̣ ⍑ᒷ  ⎓ᒷᔑℸ ̣ ⚍∷ᒷ,  ℸ ̣ 𝙹  ᔑ⚍ℸ ̣ 𝙹ᒲᔑℸ ̣ ╎ᓵᔑꖎꖎ||  ᓭᒷᔑ∷ᓵ⍑  ⎓𝙹∷  ℸ ̣ ⍑ᒷ  ꖎ𝙹⊣-⎓╎ꖎᒷᓭ  ╎リ  ᔑ  ↸ᒷ⎓╎リᒷ↸  ⎓𝙹ꖎ↸ᒷ∷.
 
-### Endpoints
+###  ᒷリ↸!¡𝙹╎リℸ ̣ ᓭ
 
-#### GET /csv/timeline
+####  ⊣ᒷℸ ̣   /ᓵᓭ⍊/ℸ ̣ ╎ᒲᒷꖎ╎リᒷ
 > Returns the timeline of the log-files in the defined folder.
 >
 > Example:
@@ -63,44 +61,47 @@ The API has the feature, to automatically search for the log-files in a defined 
 > ```
 
 
-### Contributing
+###  ᓵ𝙹リℸ ̣ ∷╎ʖ⚍ℸ ̣ ╎リ⊣
 
-1. Fork it
-2. Create your feature branch (`git checkout -b feature/fooBar`)
-3. Commit your changes (`git commit -am 'Add some fooBar'`)
-4. Push to the branch (`git push origin feature/fooBar`)
-5. Create a new Pull Request
-6. Wait for the review
-7. Merge the pull request
-8. Done
+1. ⎓𝙹∷ꖌ  ╎ℸ ̣
+2. ᓵ∷ᒷᔑℸ ̣ ᒷ  ||𝙹⚍∷  ⎓ᒷᔑℸ ̣ ⚍∷ᒷ  ʖ∷ᔑリᓵ⍑  (`⊣╎ℸ ̣   ᓵ⍑ᒷᓵꖌ𝙹⚍ℸ ̣   -ʖ  ⎓ᒷᔑℸ ̣ ⚍∷ᒷ/⎓𝙹𝙹ʖᔑ∷`)
+3. ᓵ𝙹ᒲᒲ╎ℸ ̣   ||𝙹⚍∷  ᓵ⍑ᔑリ⊣ᒷᓭ  (`⊣╎ℸ ̣   ᓵ𝙹ᒲᒲ╎ℸ ̣   -ᔑᒲ  'ᔑ↸↸  ᓭ𝙹ᒲᒷ  ⎓𝙹𝙹ʖᔑ∷'`)
+4. !¡⚍ᓭ⍑  ℸ ̣ 𝙹  ℸ ̣ ⍑ᒷ  ʖ∷ᔑリᓵ⍑  (`⊣╎ℸ ̣   !¡⚍ᓭ⍑  𝙹∷╎⊣╎リ  ⎓ᒷᔑℸ ̣ ⚍∷ᒷ/⎓𝙹𝙹ʖᔑ∷`)
+5. ᓵ∷ᒷᔑℸ ̣ ᒷ  ᔑ  リᒷ∴  !¡⚍ꖎꖎ  ∷ᒷᑑ⚍ᒷᓭℸ ̣
+6. ∴ᔑ╎ℸ ̣   ⎓𝙹∷  ℸ ̣ ⍑ᒷ  ∷ᒷ⍊╎ᒷ∴
+7. ᒲᒷ∷⊣ᒷ  ℸ ̣ ⍑ᒷ  !¡⚍ꖎꖎ  ∷ᒷᑑ⚍ᒷᓭℸ ̣
+8. ↸𝙹リᒷ
 
-## License
+##  ꖎ╎ᓵᒷリᓭᒷ
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+ℸ ̣ ⍑╎ᓭ  !¡∷𝙹⋮ᒷᓵℸ ̣   ╎ᓭ  ꖎ╎ᓵᒷリᓭᒷ↸  ⚍リ↸ᒷ∷  ℸ ̣ ⍑ᒷ  ᒲ╎ℸ ̣   ꖎ╎ᓵᒷリᓭᒷ  -  ᓭᒷᒷ  ℸ ̣ ⍑ᒷ [LICENSE.md](LICENSE.md) ⎓╎ꖎᒷ  ⎓𝙹∷  ↸ᒷℸ ̣ ᔑ╎ꖎᓭ
 
-## Contact
+##  ᓵ𝙹リℸ ̣ ᔑᓵℸ ̣
 
-Levin Zimmermann - Scrum Master
+Levin Zimmermann - ᓭᓵ∷⚍ᒲ  ᒲᔑᓭℸ ̣ ᒷ∷
 - [LinkedIn](https://www.linkedin.com/in/levin-zimmermann-049ab4257/)
 - [Mail](mailto:levinzimmermann06@gmail.com)
 - [GitHub](https://github.com/RikoxCode)
 
-Loise Möckli - Developer
+Loise Möckli - ↸ᒷ⍊ᒷꖎ𝙹!¡ᒷ∷
 - [LinkedIn](https://www.linkedin.com/in/loise-m%C3%B6ckli-3b3b3b1b3/)
 - [Mail](mailto:)
 - [GitHub]()
 
-Jana Junemann - Developer
+Jana Junemann - ↸ᒷ⍊ᒷꖎ𝙹!¡ᒷ∷
 - [LinkedIn](https://www.linkedin.com/in/jana-junemann-3b3b3b1b3/)
 - [Mail](mailto:)
 - [GitHub]()
 
-Nelio Gautschi - Developer
+Nelio Gautschi - ↸ᒷ⍊ᒷꖎ𝙹!¡ᒷ∷
 - [LinkedIn](https://www.linkedin.com/in/nelio-gautschi-3b3b3b1b3/)
 - [Mail](mailto:)
 - [GitHub]()
 
 
-## Acknowledgements
+##  ᔑᓵꖌリ𝙹∴ꖎᒷ↸⊣ᒷᒲᒷリℸ ̣ ᓭ
 
 - [Maxon Motor](https://www.maxonmotor.com/)
+
+##  ╎ᒲᔑ⊣ᒷ  𝙹⎓  ℸ ̣ ⍑ᒷ  !¡∷𝙹↸-↸↸ᒲ-ᔑ!¡╎
+![Just a Image](https://github.com/ddmaxon/Prod-DDM-API/assets/111433435/e3c7c9fe-f2e1-4075-8a4c-d5296ed99524)
