@@ -155,19 +155,19 @@ app.MapGet("/csv/tests/getvalues", () =>
 {
     return hRC.HandleErrors(() =>
     {
-        FileController loader = new FileController("./Data/Csv/testdata2.csv");
+        FileController loader = new FileController("./Data/Csv/testdata.csv");
 
         return loader.GetTestsWithValues();
     });
 });
-/*app.MapGet("/csv/latest/gethistory", () =>
+app.MapGet("/csv/latest/gethistory", () => // not completed
 {
     return hRC.HandleErrors(() =>
     {
-        FileController loader = new FileController("./Data/Csv/testdata.csv");
+        FileController loader = new FileController("./Data/Csv/testdata2.csv");
 
         return loader.CreateHistory();
     });
-}); */
+}); 
 
 app.Run();

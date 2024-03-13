@@ -14,6 +14,6 @@
         public static readonly string DB_HOST = "vpn.wicki.sbs";
         public static readonly string DB_DATABASE = "prod_ddm_db";
         public static readonly string DB_USER_NAME = "root";
-        public static readonly string DB_USER_PASSWORD = "password";
+        public static readonly string DB_USER_PASSWORD = "L0y1/4/WFC3{&r%j@U>H";
     }
 }

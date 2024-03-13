@@ -6,6 +6,7 @@ using System.Data;
 using System.IO;
 using MongoDB.Bson;
 using MySqlX.XDevAPI.Common;
+using Prod_DDM_API.types.Sql;
 
 namespace Prod_DDM_API.Classes
 {
@@ -408,53 +409,91 @@ namespace Prod_DDM_API.Classes
             };
         }
 
-        public void CreateHistory()
-        {
-            HistoryFileData history = new HistoryFileData();
-
-            history.name = Path.GetFileName(_file_path);
-
-            history.id = ""; // TODO
-
-
-            history.values.testData.testCount = 0; // TODO, db abfrage...
-            history.values.testData.testPass = 0; // TODO, db abfrage...
-            history.values.testData.testFail = 0; // TODO, db abfrage...
-            history.values.testData.testPassRate =
-                100 / history.values.testData.testCount * history.values.testData.testPass;
-
-            // history.values.testData.tests[0] = ""; // name TODO
-            // history.values.testData.tests[1] = ""; // result TODO
-            // history.values.testData.tests[2] = ; // time TODO
-            // history.values.testData.tests[3] = ""; // vals=motVoltage, etc.. 
-
-            // history.values.date = this._creation_time.ToString("yyyy-MM-dd"); // TODO
-            // history.values.time = this._creation_time.ToString("HH:mm:ss"); // TODO
-            string fileExt = Path.GetExtension(_file_path); // TODO check
-            if (fileExt == ".csv")
+        public StorageOutput CreateHistory(){ // return must be in correct state
+            try
             {
-                history.values.type = "csv (MotTestLog)";
-            }
-            else
-            {
-                history.values.type = "undefined";
-            }
+                HistoryFileData history = new HistoryFileData();
+                object oFiles = this._storage.GetFiles().data;
+                if (oFiles is List<SqlFileOutput>)
+                {
+                    List<SqlFileOutput> files = (List<SqlFileOutput>)oFiles;
+                    foreach (SqlFileOutput file in files)
+                    {
+                        history.name = file._file_path; // TODO check
+                        
+                        history.id = file.id; // TODO check
+                        history.values.testData.testCount = int.Parse(file._tests_count); // TODO check
 
-            history.values.size = $"{((double)this._file.Length / (1024 * 1024)):F2}MB"; // TODO check
-            if (history.values.testData.testPass + history.values.testData.testFail ==
-                history.values.testData.testCount)
-            {
-                history.values.process.status = "Finished";
-            }
-            else
-            {
-                history.values.process.status = "Airing";
-            }
+                        history.values.testData.testPass = this._storage.GetTestPassed(int.Parse(history.id)); // TODO check
+                        history.values.testData.testFail = this._storage.GetTestFailed(int.Parse(history.id)); // TODO check
 
-            // history.values.process.time = ""; // TODO
-            history.values.process.progress = 100 / history.values.testData.testCount *
-                                              (history.values.testData.testPass + history.values.testData.testFail);
-            history.values.process.message = ""; // leave empty
+                        history.values.testData.testPassRate = 100 / history.values.testData.testCount *
+                                                               history.values.testData.testPass;
+                        
+                        // below needs to be in a foreach function
+                        this._storage.GetTestInfo(int.Parse(history.id));
+                        // history.values.testData.tests[0] = ""; // name TODO
+                        // history.values.testData.tests[1] = ""; // result TODO
+                        // history.values.testData.tests[2] = ; // time TODO
+                        // history.values.testData.tests[3] = ""; // vals=motVoltage, etc...
+
+                        DateTime temp_dateTime = DateTime.ParseExact(file._creation_time, "dd.MM.yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+                        history.values.date = new DateOnly(temp_dateTime.Date.Year, temp_dateTime.Date.Month, temp_dateTime.Date.Day);// TODO check
+                        history.values.time = new TimeOnly(temp_dateTime.TimeOfDay.Hours, temp_dateTime.TimeOfDay.Minutes, temp_dateTime.TimeOfDay.Seconds); // TODO check
+                        string fileExt = Path.GetExtension(_file_path); // TODO 
+                        if (fileExt == ".csv")
+                        {
+                            history.values.type = "csv (MotTestLog)";
+                        }
+                        else
+                        {
+                            history.values.type = "undefined";
+                        }
+
+                        history.values.size = $"{((double)this._file.Length / (1024 * 1024)):F2}MB"; // TODO 
+                        if (history.values.testData.testPass + history.values.testData.testFail ==
+                            history.values.testData.testCount)
+                        {
+                            history.values.process.status = "Finished";
+                        }
+                        else
+                        {
+                            history.values.process.status = "Airing";
+                        }
+
+                        // history.values.process.time = ""; // TODO
+                        history.values.process.progress = 100 / history.values.testData.testCount *
+                                                          (history.values.testData.testPass +
+                                                           history.values.testData.testFail);
+                        history.values.process.message = ""; // leave empty
+
+                        // this gives status 500????
+                        return new StorageOutput
+                        {
+                            isSuccessfull = true, affected = 0,
+                            message =
+                                $"historyData",
+                            data = ""
+                        };
+                    }
+                }
+
+                return new StorageOutput()
+                {
+                    isSuccessfull = false,
+                    affected = 0,
+                    message = "No files found for processing.",
+                    data = null
+                };
+            }
+            catch (Exception err)
+            {
+                return new StorageOutput
+                {
+                    isSuccessfull = false, affected = 0,
+                    message = err.Message, data = ""
+                };
+            }
         }
 
         public List<HistoryTests> GetTestsWithValues()

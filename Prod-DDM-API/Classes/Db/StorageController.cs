@@ -3,6 +3,7 @@ using Mysqlx.Resultset;
 using Prod_DDM_API.types.Sql;
 using Prod_DDM_API.Types;
 using System.Xml.Linq;
+using Prod_DDM_API.Types.History;
 using static System.Collections.Specialized.BitVector32;
 
 namespace Prod_DDM_API.Classes.Db
@@ -277,33 +278,77 @@ namespace Prod_DDM_API.Classes.Db
                 return this.GetOutput(500, err.Message);
             }
         }
-        public StorageOutput GetTestPassed()
+
+        public int GetTestPassed(int fileId)
         {
-            try
-            {
-                //Connect to DB
-                this._db.ConnectDb();
+            //Connect to DB
+            this._db.ConnectDb();
 
-                MySqlDataReader reader = this._db.execR("SELECT COUNT(*) FROM ddm_files WHERE message LIKE '%passed%'");
+            MySqlDataReader reader = this._db.execR($"SELECT COUNT(*) FROM ddm_tests WHERE result LIKE '%Pass%' AND fileid = {fileId}"); 
 
-                int passedTestsCount = 0;
+            int passedTests = 0;
 
-                //Read the data and count the rows containing "passed"
-                if (reader.Read()){
-                    passedTestsCount = reader.GetInt32(0);
-                }
-
-                reader.Close();
-
-                //Disconnect DB
-                this._db.DisconnectDb();
-
-                return this.GetOutput(200, "Files successfully read!", passedTestsCount, 0);
+            //Read the data and count the rows containing "failed"
+            if (reader.Read()){
+                passedTests = reader.GetInt32(0);
             }
-            catch (Exception err)
-            {
-                return this.GetOutput(500, err.Message);
+
+            reader.Close();
+
+            //Disconnect DB
+            this._db.DisconnectDb();
+
+            return passedTests;
+        }
+        public int GetTestFailed(int fileId)
+        {
+            //Connect to DB
+            this._db.ConnectDb();
+
+            MySqlDataReader reader = this._db.execR($"SELECT COUNT(*) FROM ddm_tests WHERE result LIKE '%Failed%' AND fileid = {fileId}"); 
+
+            int failedTests = 0;
+
+            //Read the data and count the rows containing "failed"
+            if (reader.Read()){
+                failedTests = reader.GetInt32(0);
             }
-        } 
+
+            reader.Close();
+
+            //Disconnect DB
+            this._db.DisconnectDb();
+
+            return failedTests;
+        }
+        public List<HistoryTests> GetTestInfo(int fileId)
+        {
+            //Connect to DB
+            this._db.ConnectDb();
+
+            MySqlDataReader reader = this._db.execR($"SELECT * FROM intg_ddm_db WHERE fileid = {fileId}");
+
+            List<HistoryTests> tests = new List<HistoryTests>();
+            
+            // Read data and store in a list
+            while (reader.Read())
+            {
+                HistoryTests test = new HistoryTests();
+
+                test.name = reader["name"] + "";
+                string time = reader["processTime"] + "";
+                test.time = TimeSpan.ParseExact(time, "HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+                test.result = reader["result"] + "";
+                
+                tests.Add(test);
+            }
+            
+            reader.Close();
+
+            //Disconnect DB
+            this._db.DisconnectDb();
+
+            return tests;
+        }
     }
 }
