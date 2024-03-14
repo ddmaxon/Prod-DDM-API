@@ -258,10 +258,13 @@ namespace Prod_DDM_API.Classes.Db
 
                     output.name = reader["name"] + "";
                     output.id = reader["id"] + "";
-                    output._file_path = reader["_file_path"] + "";
+                    output._file_path = reader["_filepath"] + "";
                     output._creation_time = reader["_creation_time"] + "";
-                    output._tests_count = reader["_tests_count"] + "";
-                    output._rows_count = reader["_rows_count"] + "";
+                    output._tests_count = reader["_testcount"] + "";
+                    output._rows_count = reader["_rowcount"] + "";
+                    output._tests_passed_count = reader["_testpasscount"] + "";
+                    output._tests_failed_count = reader["_testfailcount"] + "";
+                    output._size = reader["_size"] + "";
 
                     files.Add(output);
                 };
@@ -284,7 +287,7 @@ namespace Prod_DDM_API.Classes.Db
             //Connect to DB
             this._db.ConnectDb();
 
-            MySqlDataReader reader = this._db.execR($"SELECT COUNT(*) FROM ddm_tests WHERE result LIKE '%Pass%' AND fileid = {fileId}"); 
+            MySqlDataReader reader = this._db.execR($"SELECT COUNT(*) FROM ddm_tests WHERE res LIKE '%Pass%' AND fid = {fileId}"); 
 
             int passedTests = 0;
 
@@ -305,7 +308,7 @@ namespace Prod_DDM_API.Classes.Db
             //Connect to DB
             this._db.ConnectDb();
 
-            MySqlDataReader reader = this._db.execR($"SELECT COUNT(*) FROM ddm_tests WHERE result LIKE '%Failed%' AND fileid = {fileId}"); 
+            MySqlDataReader reader = this._db.execR($"SELECT COUNT(*) FROM ddm_tests WHERE res LIKE '%Failed%' AND fid = {fileId}"); 
 
             int failedTests = 0;
 
@@ -325,24 +328,24 @@ namespace Prod_DDM_API.Classes.Db
         {
             //Connect to DB
             this._db.ConnectDb();
-
-            MySqlDataReader reader = this._db.execR($"SELECT * FROM intg_ddm_db WHERE fileid = {fileId}");
+            MySqlDataReader reader = this._db.execR($"SELECT * FROM ddm_tests WHERE fid = {fileId}");
 
             List<HistoryTests> tests = new List<HistoryTests>();
-            
+
             // Read data and store in a list
             while (reader.Read())
             {
                 HistoryTests test = new HistoryTests();
 
                 test.name = reader["name"] + "";
-                string time = reader["processTime"] + "";
-                test.time = TimeSpan.ParseExact(time, "HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
-                test.result = reader["result"] + "";
+                string time = reader["progressTime"] + "";
+                test.time = TimeSpan.ParseExact(time, "hh\\:mm\\:ss\\.fffffff", System.Globalization.CultureInfo.InvariantCulture);
+                test.result = reader["res"] + "";
+                // test.vals = null; // TODO get vals, needs another query
                 
                 tests.Add(test);
             }
-            
+
             reader.Close();
 
             //Disconnect DB

@@ -409,38 +409,36 @@ namespace Prod_DDM_API.Classes
             };
         }
 
-        public StorageOutput CreateHistory(){ // return must be in correct state
+        public object CreateHistory(){ 
             try
             {
-                HistoryFileData history = new HistoryFileData();
+                List<HistoryFileData> histories = new List<HistoryFileData>();
                 object oFiles = this._storage.GetFiles().data;
                 if (oFiles is List<SqlFileOutput>)
                 {
-                    List<SqlFileOutput> files = (List<SqlFileOutput>)oFiles;
+                    List<SqlFileOutput> files = (List<SqlFileOutput>) oFiles;
                     foreach (SqlFileOutput file in files)
                     {
-                        history.name = file._file_path; // TODO check
-                        
-                        history.id = file.id; // TODO check
-                        history.values.testData.testCount = int.Parse(file._tests_count); // TODO check
+                        HistoryFileData history = new HistoryFileData();
 
-                        history.values.testData.testPass = this._storage.GetTestPassed(int.Parse(history.id)); // TODO check
-                        history.values.testData.testFail = this._storage.GetTestFailed(int.Parse(history.id)); // TODO check
+                        history.name = file._file_path;   
+                        history.id = file.id;
+                        
+                        history.values = new HistoryValues();
+                        history.values.testData = new HistoryTestData();
+                        
+                        history.values.testData.testCount = int.Parse(file._tests_count); 
+                        history.values.testData.testPass = this._storage.GetTestPassed(int.Parse(history.id)); 
+                        history.values.testData.testFail = this._storage.GetTestFailed(int.Parse(history.id)); 
 
                         history.values.testData.testPassRate = 100 / history.values.testData.testCount *
                                                                history.values.testData.testPass;
-                        
-                        // below needs to be in a foreach function
-                        this._storage.GetTestInfo(int.Parse(history.id));
-                        // history.values.testData.tests[0] = ""; // name TODO
-                        // history.values.testData.tests[1] = ""; // result TODO
-                        // history.values.testData.tests[2] = ; // time TODO
-                        // history.values.testData.tests[3] = ""; // vals=motVoltage, etc...
 
+                        history.values.testData.tests = this._storage.GetTestInfo(int.Parse(history.id));
                         DateTime temp_dateTime = DateTime.ParseExact(file._creation_time, "dd.MM.yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
-                        history.values.date = new DateOnly(temp_dateTime.Date.Year, temp_dateTime.Date.Month, temp_dateTime.Date.Day);// TODO check
-                        history.values.time = new TimeOnly(temp_dateTime.TimeOfDay.Hours, temp_dateTime.TimeOfDay.Minutes, temp_dateTime.TimeOfDay.Seconds); // TODO check
-                        string fileExt = Path.GetExtension(_file_path); // TODO 
+                        history.values.date = new DateOnly(temp_dateTime.Date.Year, temp_dateTime.Date.Month, temp_dateTime.Date.Day);
+                        history.values.time = new TimeOnly(temp_dateTime.TimeOfDay.Hours, temp_dateTime.TimeOfDay.Minutes, temp_dateTime.TimeOfDay.Seconds); 
+                        string fileExt = Path.GetExtension(history.name); 
                         if (fileExt == ".csv")
                         {
                             history.values.type = "csv (MotTestLog)";
@@ -449,8 +447,9 @@ namespace Prod_DDM_API.Classes
                         {
                             history.values.type = "undefined";
                         }
-
-                        history.values.size = $"{((double)this._file.Length / (1024 * 1024)):F2}MB"; // TODO 
+                        double fileSize = double.Parse(file._size);
+                        history.values.size = $"{(fileSize / (1024 * 1024)):F2}MB"; // TODO, this should convert KB to MB
+                        history.values.process = new HistoryProcess();
                         if (history.values.testData.testPass + history.values.testData.testFail ==
                             history.values.testData.testCount)
                         {
@@ -460,22 +459,15 @@ namespace Prod_DDM_API.Classes
                         {
                             history.values.process.status = "Airing";
                         }
-
                         // history.values.process.time = ""; // TODO
                         history.values.process.progress = 100 / history.values.testData.testCount *
                                                           (history.values.testData.testPass +
                                                            history.values.testData.testFail);
                         history.values.process.message = ""; // leave empty
-
-                        // this gives status 500????
-                        return new StorageOutput
-                        {
-                            isSuccessfull = true, affected = 0,
-                            message =
-                                $"historyData",
-                            data = ""
-                        };
+                        
+                        histories.Add(history);
                     }
+                    return histories;
                 }
 
                 return new StorageOutput()
