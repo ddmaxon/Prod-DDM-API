@@ -1,5 +1,5 @@
 using Microsoft.OpenApi.Models;
-
+using Prod_DDM_API;
 using Prod_DDM_API.Classes;
 using Prod_DDM_API.Data;
 
@@ -48,6 +48,8 @@ app.UseSwaggerUI(c =>
 
 // HttpResponseController = C# Error to HTTP-Error-Code and standard response
 HttpResponseController hRC = new HttpResponseController();
+KardinalSystem kardinal = new KardinalSystem();
+
 
 app.MapGet("/", () =>
 {
@@ -57,7 +59,8 @@ app.MapGet("/", () =>
     // Setze den MIME-Typ auf "text/html"
     return Results.Content(html, "text/html");
 });
-app.MapGet("/csv/latest/count", () =>
+/*
+app.MapGet("/api/csv/latest/count", () =>
 {
     return hRC.HandleErrors(() =>
     {
@@ -66,7 +69,7 @@ app.MapGet("/csv/latest/count", () =>
         return loader.GetCsvLines().Count;
     });
 });
-app.MapGet("/csv/latest/datetime", () =>
+app.MapGet("/api/csv/latest/datetime", () =>
 {
     return hRC.HandleErrors(() =>
     {
@@ -75,27 +78,16 @@ app.MapGet("/csv/latest/datetime", () =>
         return loader.GetCreationTime();
     });
 });
-app.MapGet("/csv/recent/timeline", () =>
+*/
+app.MapGet("/api/csv/recent/timeline", () =>
 {
     return hRC.HandleErrors(() =>
     {
-        FileController loader = new FileController("./Data/Csv/testdata2.csv");
-
-        List<object> list = new List<object>();
-
-        object timeline = loader.GetTimeline();
-
-        object all = loader.GetExecutionTimeWithSelectors(loader.GetExecutionTime(loader.GetCsvLines()).ToArray());
-
-        foreach(var key in Config.CSVDataKeyConfig)
-        {
-            list.Add( new { key, value = loader.GetExecutionTimeWithSelectors(loader.GetExecutionTime(loader.GetCsvLines(), key).ToArray())});
-        }
-
-        return new { timeline, execTimeline = new { all, sorted = list } };
+        return kardinal.GetFunctionExecution("Timeline");
     });
 });
-app.MapGet("/csv/tests", () =>
+/*
+app.MapGet("/api/csv/tests", () =>
 {
     return hRC.HandleErrors(() =>
     {
@@ -104,7 +96,7 @@ app.MapGet("/csv/tests", () =>
         return loader.GetAllTests();
     });
 });
-app.MapGet("/csv/search/{substring}", (string substring) =>
+app.MapGet("/api/csv/search/{substring}", (string substring) =>
 {
     return hRC.HandleErrors(() =>
     {
@@ -113,7 +105,7 @@ app.MapGet("/csv/search/{substring}", (string substring) =>
         return loader.SearchSubstringInCsv(substring);
     });
 });
-app.MapGet("/csv/tests/proofedornot", () =>
+app.MapGet("/api/csv/tests/proofedornot", () =>
 {
     return hRC.HandleErrors(() =>
     {
@@ -122,7 +114,7 @@ app.MapGet("/csv/tests/proofedornot", () =>
         return loader.GetFilteredTests(loader.SearchSubstringInCsv("_TS_Execution"));
     });
 });
-app.MapGet("/csv/tests/proofedornot2", () =>
+app.MapGet("/api/csv/tests/proofedornot2", () =>
 {
     return hRC.HandleErrors(() =>
     {
@@ -133,15 +125,15 @@ app.MapGet("/csv/tests/proofedornot2", () =>
         return loader.GetFilteredTests2(tests.data);
     });
 });
-app.MapGet("/csv/tests/dbinsert", () =>
+*/
+app.MapGet("/api/csv/tests/dbinsert", () =>
 {
     return hRC.HandleErrors(() =>
     {
-        FileController loader = new FileController("./Data/Csv/testdata.csv");
-
-        return loader.testInsert();
+        return kardinal.GetFunctionExecution("TestInsertFile");
     });
 });
+/*
 app.MapGet("/csv/tests/dbselect", () =>
 {
     return hRC.HandleErrors(() =>
@@ -151,13 +143,21 @@ app.MapGet("/csv/tests/dbselect", () =>
         return loader.testSelect();
     });
 });
-app.MapGet("/csv/tests/getvalues", () =>
+*/
+app.MapGet("/api/csv/tests/getvalues", () =>
 {
     return hRC.HandleErrors(() =>
     {
-        FileController loader = new FileController("./Data/Csv/testdata2.csv");
+        return kardinal.GetFunctionExecution("GetValues");
+    });
+});
 
-        return loader.GetTestsWithValues();
+
+app.MapGet("/api/csv/recent/history/{id}", (string id) =>
+{
+    return hRC.HandleErrors(() =>
+    {
+        return kardinal.GetFunctionExecution("HistoryID", new string[]{id});
     });
 });
 

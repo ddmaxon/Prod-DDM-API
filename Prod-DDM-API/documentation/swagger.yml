@@ -1,0 +1,24 @@
+swagger: '2.0'
+info:
+  title: Beispiel API
+  description: Beschreibung der Beispiel API
+  version: 1.0.0
+host: api.example.com
+basePath: /
+schemes:
+  - https
+paths:
+  /api/csv/recent/timeline:
+    get:
+      summary: Abrufen der letzten Timeline-Daten im CSV-Format
+      description: Gibt die neuesten Timeline-Daten im CSV-Format zurück.
+      responses:
+        200:
+          description: Erfolgreiche Abfrage. Die CSV-Daten werden zurückgegeben.
+          schema:
+            type: string
+            format: binary
+        500:
+          description: Fehler bei der Abfrage. Es wurden keine CSV-Daten zurückgegeben.
+      produces:
+        - text/csv

@@ -3,9 +3,8 @@ using Prod_DDM_API.Data;
 using Prod_DDM_API.Types;
 using Prod_DDM_API.Types.History;
 using System.Data;
-using System.IO;
 using MongoDB.Bson;
-using MySqlX.XDevAPI.Common;
+using Array = Mysqlx.Datatypes.Array;
 
 namespace Prod_DDM_API.Classes
 {
@@ -466,16 +465,12 @@ namespace Prod_DDM_API.Classes
                 tests = tests.data;
                 HistoryTests hTest;
                 
-                Console.WriteLine(tests);
-
                 int index = 1;
                 foreach (List<CsvLine> test in tests)
                 {
                     hTest = new HistoryTests();
                     hTest.vals = new List<HistoryTestsValue>();
                     
-                    Console.WriteLine(hTest.ToJson());
-
                     bool isFailed = false;
                     bool hasVals = false;
 
@@ -500,7 +495,7 @@ namespace Prod_DDM_API.Classes
                     if (hasVals)
                     {
                         //Create test name for test
-                        hTest.name = $"Test {index}";
+                        hTest.name = $"Test {hTest.vals[0].id}";
 
                         //Set exec time for test
                         DateTime initTime = test[0].date;
@@ -526,13 +521,41 @@ namespace Prod_DDM_API.Classes
                         index++;
                     }
                 }
-
-                return result;
+                
+                //Result validation of testvalueid 
+                List<HistoryTests> validTests = new List<HistoryTests>();
+                List<string> ids = new List<string>();
+                string currentId = "";
+                bool isLonely = false;
+                foreach (HistoryTests test in result)
+                {
+                    currentId = "";
+                    foreach (HistoryTestsValue val in test.vals)
+                    {
+                        if (!ids.Contains(val.id))
+                        {
+                            isLonely = true;
+                            currentId = val.id;
+                            ids.Add(val.id);
+                            break;
+                        }
+                        else
+                        {
+                            isLonely = false;
+                        }
+                    }
+                    
+                    if(isLonely && currentId != "")
+                    {
+                        validTests.Add(test);
+                    }
+                }
+                
+                return validTests;
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                throw;
+                throw new Exception(e.Message);
             }
         }
 
@@ -546,8 +569,6 @@ namespace Prod_DDM_API.Classes
 
             if (message.Contains(key))
             {
-                List<HistoryTestsValueData> msg = new List<HistoryTestsValueData>();
-
                 //"... '...','...','...' --Successfully" => ["...", "'...','...','...'", "--Successfully"]
                 string[] msgArr = message.Split(" ");
 
@@ -556,16 +577,26 @@ namespace Prod_DDM_API.Classes
 
                 HistoryTestsValueData data = new HistoryTestsValueData();
                 
+                while (values[8].Contains("'") || values[10].Contains("'") || values[11].Contains("'") || values[12].Contains("'") || values[13].Contains("'"))
+                {
+                    values[8] = values[8].Replace("'", "");
+                    values[10] = values[10].Replace("'", "");
+                    values[11] = values[11].Replace("'", "");
+                    values[12] = values[12].Replace("'", "");
+                    values[13] = values[13].Replace("'", "");
+                }
+                
                 data.max = values[12];
                 data.avg = values[11];
                 data.min = values[10];
-
-                //Set test results and give it to the client
+                
+                //Set ID of test and other values
+                
+                
+                hTestVal.id = values[8].Replace("-", "");
                 hTestVal.value = data;
                 hTestVal.result = values[13];
-                hTestVal.id = values[8];
             }
-            
             return hTestVal;
         }
 

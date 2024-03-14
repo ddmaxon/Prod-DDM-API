@@ -1,5 +1,8 @@
-﻿using SharpCompress.Crypto;
+﻿using System.Data;
+using SharpCompress.Crypto;
 using System.Diagnostics;
+using Prod_DDM_API.Types.Kardinal;
+using System.Runtime.Remoting;
 
 namespace Prod_DDM_API.Classes
 {
@@ -8,18 +11,20 @@ namespace Prod_DDM_API.Classes
         /**
          * Function to handle errors and return the response to the client
          */
-        public object HandleErrors(Func<object> method)
+        public object HandleErrors(Func<dynamic> method)
         {
             try
             {
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
 
-                var response = method(); // Execute the method
+                KardinalOutput response = method(); // Execute the method
 
                 stopwatch.Stop();
-
-                return new { status = 200, data = response, exectime = stopwatch.ElapsedMilliseconds };
+                
+                response.execTime = stopwatch;
+                
+                return response;
             }
             catch (Exception err)
             {
@@ -78,5 +83,13 @@ namespace Prod_DDM_API.Classes
             return errorCode;
         }
 
+    }
+
+    public class ServerException : Exception
+    {
+        public ServerException(string message)
+            : base(message)
+        {
+        }
     }
 }

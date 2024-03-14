@@ -1,5 +1,4 @@
-﻿using Prod_DDM_API.Types;
-using Prod_DDM_API.Data;
+﻿using Prod_DDM_API.Data;
 //Add MySql Library
 using MySql.Data.MySqlClient;
 
@@ -56,7 +55,7 @@ namespace Prod_DDM_API.Classes.Db
         //DB query size adjustment
         private string CheckQuerySize(string query)
         {
-            int maxLenght = 100;
+            int maxLenght = 400;
             if (query.Length > maxLenght)
             {
                 //Resize query to 50 chars

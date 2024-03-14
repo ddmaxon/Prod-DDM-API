@@ -1,9 +1,8 @@
-﻿using MySql.Data.MySqlClient;
-using Mysqlx.Resultset;
+﻿using MongoDB.Bson;
+using MySql.Data.MySqlClient;
 using Prod_DDM_API.types.Sql;
 using Prod_DDM_API.Types;
-using System.Xml.Linq;
-using static System.Collections.Specialized.BitVector32;
+using Prod_DDM_API.Types.History;
 
 namespace Prod_DDM_API.Classes.Db
 {
@@ -44,7 +43,6 @@ namespace Prod_DDM_API.Classes.Db
         {
             try
             {
-
                 // Get the name
                 string name = fc.GetFileInfo().Name;
 
@@ -52,25 +50,40 @@ namespace Prod_DDM_API.Classes.Db
                 string cTime = Convert.ToString(fc.GetCreationTime());
 
                 // Get the path
-                string path = fc.GetFileInfo().FullName;
+                FileInfo f = fc.GetFileInfo();
+                string path = Path.GetFullPath(f.Name);
 
                 // Get the count of all Lines
                 string rCount = Convert.ToString(fc.GetCsvLines().Count);
 
                 // Get the count of all tests
-                dynamic tests = fc.GetAllTests();
-                string tCount = Convert.ToString(tests.testCount);
+                List<HistoryTests> tests = fc.GetTestsWithValues();
+                string tCount = Convert.ToString(tests.Count);
+                
+                // Get the size of the file
+                float size = (float)((f.Length / 1024) / 1024);
 
+                // Get the passCount of all tests
+                int testFail = tests.Count(obj => obj.GetType().GetProperty("result")?.GetValue(obj)?.ToString()?.ToLower() == "failed");
+                int testPass = tests.Count(obj => obj.GetType().GetProperty("result")?.GetValue(obj)?.ToString()?.ToLower() == "pass");                
+                
+                Console.WriteLine(tests.ToJson());
+                
                 //Connect to the DB
                 this._db.ConnectDb();
-
+                
                 // Execute the insert statement
-                this._db.execCUD($"INSERT INTO ddm_files (name, _creation_time, _file_path, _rows_count, _tests_count) VALUES ('{name}', '{cTime}', '{path}', '{rCount}', '{tCount}')");
+                this._db.execCUD($"INSERT INTO ddm_files (name, _creation_time, _filepath, _rowcount, _testcount, _testpasscount, _testfailcount, _size) " +
+                                       $"VALUES ('{name}', '{cTime}', '{path}', {rCount}, {tCount}, {testPass}, {testFail}, {size})");
 
                 List<CsvLine> rows = fc.GetCsvLines();
                 List<SqlFileOutput> parent = GetParentFiles(name);
+                
+                Console.WriteLine(parent.ToJson());
 
                 this.InsertRows(rows, int.Parse(parent[0].id), true);
+
+                this.InsertTests(fc, int.Parse(parent[0].id), tests);
 
                 //Disconnect DB
                 this._db.DisconnectDb();
@@ -81,7 +94,7 @@ namespace Prod_DDM_API.Classes.Db
             }
             catch (Exception err)
             {
-                // Return a response
+                Console.WriteLine(err);
                 return this.GetOutput(500, err.Message);
             }
         }
@@ -125,7 +138,7 @@ namespace Prod_DDM_API.Classes.Db
                 this._db.ConnectDb();
 
                 // Execute the insert statemet
-                this._db.execCUD($"INSERT INTO ddm_rows (fileid, date, section, exec_file, message, _index) VALUES ({fileid}, '{date}', '{section}', '{exec_file}', '{message}', {_index})");
+                this._db.execCUD($"INSERT INTO ddm_rows (fid, date, section, execfunction, msg, _index) VALUES ({fileid}, '{date}', '{section}', '{exec_file}', '{message}', {_index})");
 
                 //Disconect DB
                 this._db.DisconnectDb();
@@ -180,7 +193,7 @@ namespace Prod_DDM_API.Classes.Db
                 }
 
                 // Execute the insert statement
-                this._db.execCUD($"INSERT INTO ddm_rows (fileid, date, section, exec_file, message, _index) VALUES {string.Join(", ", values)};");
+                this._db.execCUD($"INSERT INTO ddm_rows (fid, date, section, execfunction, msg, _index) VALUES {string.Join(", ", values)};");
 
                 // Disconnect DB
                 this._db.DisconnectDb();
@@ -193,6 +206,49 @@ namespace Prod_DDM_API.Classes.Db
                 // Return a response
                 return this.GetOutput(500, err.Message);
             }
+        }
+
+        public StorageOutput InsertTests(FileController fc, int fileid, List<HistoryTests> tests = null)
+        {
+            //Get all tests with values
+            if (tests == null)
+            {
+                tests = fc.GetTestsWithValues();
+            }            
+            
+            //Connect to the DB
+            this._db.ConnectDb();
+
+            //Insert all tests
+            List<string> values = new List<string>();
+            List<string> secndVals = new List<string>();
+            foreach (HistoryTests test in tests)
+            {
+                values.Add($"('{test.vals[0].id}', '{test.name}', '{test.result}', {fileid}, {test.vals[0].id}, '{test.time}')");
+                foreach(HistoryTestsValue value in test.vals)
+                {
+                    while (value.id.Contains("'") || value.key.Contains("'") || value.value.min.Contains("'") || value.value.avg.Contains("'") || value.value.max.Contains("'"))
+                    {
+                        // Remove single quotes from message
+                        value.key = value.key.Replace("'", "");
+                        
+                        value.value.min = value.value.min.Replace("'", "");
+                        value.value.avg = value.value.avg.Replace("'", "");
+                        value.value.max = value.value.max.Replace("'", "");
+                    }
+                    
+                    secndVals.Add($"({fileid}, {value.id}, '{value.result}', '{value.key}', '{value.value.min}', '{value.value.avg}', '{value.value.max}')");
+                }
+                
+            }
+            this._db.execCUD($"INSERT INTO ddm_tests (id, name, res, fid, serialNumber,  progresstime) VALUES {string.Join(", ", values)}");
+
+            this._db.execCUD($"INSERT INTO ddm_tests_vls (fid, tid, res, `key`, vls_min, vls_avg, vls_max) VALUES {string.Join(", ", secndVals)}");
+            
+            //Disconnect DB
+            this._db.DisconnectDb();
+            
+            return this.GetOutput(200);
         }
         // Placeholder for determining testid
         private int DetermineTestID(CsvLine row)
@@ -219,10 +275,14 @@ namespace Prod_DDM_API.Classes.Db
 
                     output.name = reader["name"] + "";
                     output.id = reader["id"] + "";
-                    output._file_path = reader["_file_path"] + "";
+                    output._file_path = reader["_filepath"] + "";
                     output._creation_time = reader["_creation_time"] + "";
-                    output._tests_count = reader["_tests_count"] + "";
-                    output._rows_count = reader["_rows_count"] + "";
+                    output._tests_count = reader["_testcount"] + "";
+                    output._rows_count = reader["_rowcount"] + "";
+                    output._testpass_count = reader["_testpasscount"] + "";
+                    output._testfail_count = reader["_testfailcount"] + "";
+                    output._size = reader["_size"] + "";
+
 
                     files.Add(output);
                 };
@@ -271,6 +331,53 @@ namespace Prod_DDM_API.Classes.Db
                 this._db.DisconnectDb();
 
                 return this.GetOutput(200, "Files successfully readed!", files, 0);
+            }
+            catch (Exception err)
+            {
+                return this.GetOutput(500, err.Message);
+            }
+        }
+        public StorageOutput SearchKardinalQuery(string kardinalQuery)
+        {
+            try
+            {
+                //Connect to DB
+                this._db.ConnectDb();
+
+                MySqlDataReader reader = this._db.execR(kardinalQuery);
+                List<Dictionary<string, object>> resultList = new List<Dictionary<string, object>>();
+
+                dynamic output;
+
+                //Read the data and store them in the list
+                while (reader.Read())
+                {
+                    Dictionary<string, object> row = new Dictionary<string, object>();
+
+                    // Iteriere über die Spalten und füge sie dem Dictionary hinzu
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        string columnName = reader.GetName(i);
+                        object columnValue = reader.GetValue(i);
+                        row[columnName] = columnValue;
+                    }
+
+                    resultList.Add(row);
+                }
+
+                if (resultList is List<SqlFileOutput>)
+                {
+                    output = new List<SqlFileOutput>();
+                    
+                    output = resultList;
+                }
+
+                reader.Close();
+
+                //Disconnect DB
+                this._db.DisconnectDb();
+
+                return this.GetOutput(200, "Files successfully readed!", resultList, 0);
             }
             catch (Exception err)
             {
