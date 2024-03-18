@@ -81,7 +81,7 @@ namespace Prod_DDM_API.Classes
 
             string outputPath = "./output/" + name;
             string inputPath = "./csv/" + name;
-
+ 
             try
             {
                 if (!File.Exists(inputPath))
@@ -409,82 +409,71 @@ namespace Prod_DDM_API.Classes
             };
         }
 
-        public object CreateHistory(){ 
+        public object GetHistory(){ 
             try
             {
-                List<HistoryFileData> histories = new List<HistoryFileData>();
-                object oFiles = this._storage.GetFiles().data;
-                if (oFiles is List<SqlFileOutput>)
+                var histories = new List<HistoryFileData>();
+                var oFiles = _storage.GetFiles().data;
+                if (oFiles is not List<SqlFileOutput> files) return "No files found for processing.";
+
+                foreach (SqlFileOutput file in files)
                 {
-                    List<SqlFileOutput> files = (List<SqlFileOutput>) oFiles;
-                    foreach (SqlFileOutput file in files)
+                    HistoryFileData history = new HistoryFileData();
+
+                    history.name = file._file_path;   
+                    history.id = file.id;
+                        
+                    history.values = new HistoryValues();
+                    history.values.testData = new HistoryTestData();
+                        
+                    history.values.testData.testCount = int.Parse(file._tests_count); 
+                    history.values.testData.testPass = _storage.GetTestPassed(int.Parse(history.id)); 
+                    history.values.testData.testFail = _storage.GetTestFailed(int.Parse(history.id)); 
+                    history.values.testData.testPassRate = 100 / history.values.testData.testCount *
+                                                           history.values.testData.testPass;
+                    history.values.testData.tests = _storage.GetTestInfo(int.Parse(history.id));
+                    foreach (HistoryTests test in history.values.testData.tests)
                     {
-                        HistoryFileData history = new HistoryFileData();
-
-                        history.name = file._file_path;   
-                        history.id = file.id;
+                        test.vals = _storage.GetTestValues(test.id);
+                    } 
                         
-                        history.values = new HistoryValues();
-                        history.values.testData = new HistoryTestData();
-                        
-                        history.values.testData.testCount = int.Parse(file._tests_count); 
-                        history.values.testData.testPass = this._storage.GetTestPassed(int.Parse(history.id)); 
-                        history.values.testData.testFail = this._storage.GetTestFailed(int.Parse(history.id)); 
-
-                        history.values.testData.testPassRate = 100 / history.values.testData.testCount *
-                                                               history.values.testData.testPass;
-
-                        history.values.testData.tests = this._storage.GetTestInfo(int.Parse(history.id));
-                        DateTime temp_dateTime = DateTime.ParseExact(file._creation_time, "dd.MM.yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
-                        history.values.date = new DateOnly(temp_dateTime.Date.Year, temp_dateTime.Date.Month, temp_dateTime.Date.Day);
-                        history.values.time = new TimeOnly(temp_dateTime.TimeOfDay.Hours, temp_dateTime.TimeOfDay.Minutes, temp_dateTime.TimeOfDay.Seconds); 
-                        string fileExt = Path.GetExtension(history.name); 
-                        if (fileExt == ".csv")
-                        {
-                            history.values.type = "csv (MotTestLog)";
-                        }
-                        else
-                        {
-                            history.values.type = "undefined";
-                        }
-                        double fileSize = double.Parse(file._size);
-                        history.values.size = $"{(fileSize / (1024 * 1024)):F2}MB"; // TODO, this should convert KB to MB
-                        history.values.process = new HistoryProcess();
-                        if (history.values.testData.testPass + history.values.testData.testFail ==
-                            history.values.testData.testCount)
-                        {
-                            history.values.process.status = "Finished";
-                        }
-                        else
-                        {
-                            history.values.process.status = "Airing";
-                        }
-                        // history.values.process.time = ""; // TODO
-                        history.values.process.progress = 100 / history.values.testData.testCount *
-                                                          (history.values.testData.testPass +
-                                                           history.values.testData.testFail);
-                        history.values.process.message = ""; // leave empty
-                        
-                        histories.Add(history);
+                    DateTime tempDateTime = DateTime.ParseExact(file._creation_time, "dd.MM.yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+                    history.values.date = new DateOnly(tempDateTime.Date.Year, tempDateTime.Date.Month, tempDateTime.Date.Day);
+                    history.values.time = new TimeOnly(tempDateTime.TimeOfDay.Hours, tempDateTime.TimeOfDay.Minutes, tempDateTime.TimeOfDay.Seconds); 
+                    string fileExt = Path.GetExtension(history.name); 
+                    if (fileExt == ".csv")
+                    {
+                        history.values.type = "csv (MotTestLog)";
                     }
-                    return histories;
+                    else
+                    {
+                        history.values.type = "undefined";
+                    }
+                    double fileSize = double.Parse(file._size);
+                    history.values.size = $"{(fileSize / (1024 * 1024)):F2}MB"; // TODO, this should convert KB to MB
+                    history.values.process = new HistoryProcess();
+                    if (history.values.testData.testPass + history.values.testData.testFail ==
+                        history.values.testData.testCount)
+                    {
+                        history.values.process.status = "Finished";
+                    }
+                    else
+                    {
+                        history.values.process.status = "Airing";
+                    }
+                    // history.values.process.time = ""; // TODO
+                    history.values.process.progress = 100 / history.values.testData.testCount *
+                                                      (history.values.testData.testPass +
+                                                       history.values.testData.testFail);
+                    history.values.process.message = ""; // leave empty
+                        
+                    histories.Add(history);
                 }
-
-                return new StorageOutput()
-                {
-                    isSuccessfull = false,
-                    affected = 0,
-                    message = "No files found for processing.",
-                    data = null
-                };
+                return histories;
             }
             catch (Exception err)
             {
-                return new StorageOutput
-                {
-                    isSuccessfull = false, affected = 0,
-                    message = err.Message, data = ""
-                };
+                return err.Message;
             }
         }
 

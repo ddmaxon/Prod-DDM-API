@@ -4,6 +4,7 @@ public class HistoryTestsValue
 {
     public string id { get; set; }
     public string key { get; set; }
-    public HistoryTestsValueData value { get; set; }
     public string result { get; set; }
+    public HistoryTestsValueData value { get; set; }
+
 }

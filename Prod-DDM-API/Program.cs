@@ -166,7 +166,7 @@ app.MapGet("/csv/latest/gethistory", () => // not completed
     {
         FileController loader = new FileController("./Data/Csv/testdata.csv");
 
-        return loader.CreateHistory();
+        return loader.GetHistory();
     });
 }); 
 

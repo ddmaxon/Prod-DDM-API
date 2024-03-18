@@ -284,49 +284,49 @@ namespace Prod_DDM_API.Classes.Db
 
         public int GetTestPassed(int fileId)
         {
-            //Connect to DB
+            // Connect to DB
             this._db.ConnectDb();
 
             MySqlDataReader reader = this._db.execR($"SELECT COUNT(*) FROM ddm_tests WHERE res LIKE '%Pass%' AND fid = {fileId}"); 
 
             int passedTests = 0;
 
-            //Read the data and count the rows containing "failed"
+            // Read the data and count the rows containing "failed"
             if (reader.Read()){
                 passedTests = reader.GetInt32(0);
             }
 
             reader.Close();
 
-            //Disconnect DB
+            // Disconnect DB
             this._db.DisconnectDb();
 
             return passedTests;
         }
         public int GetTestFailed(int fileId)
         {
-            //Connect to DB
+            // Connect to DB
             this._db.ConnectDb();
 
             MySqlDataReader reader = this._db.execR($"SELECT COUNT(*) FROM ddm_tests WHERE res LIKE '%Failed%' AND fid = {fileId}"); 
 
             int failedTests = 0;
 
-            //Read the data and count the rows containing "failed"
+            // Read the data and count the rows containing "failed"
             if (reader.Read()){
                 failedTests = reader.GetInt32(0);
             }
 
             reader.Close();
 
-            //Disconnect DB
+            // Disconnect DB
             this._db.DisconnectDb();
 
             return failedTests;
         }
         public List<HistoryTests> GetTestInfo(int fileId)
         {
-            //Connect to DB
+            // Connect to DB
             this._db.ConnectDb();
             MySqlDataReader reader = this._db.execR($"SELECT * FROM ddm_tests WHERE fid = {fileId}");
 
@@ -337,18 +337,50 @@ namespace Prod_DDM_API.Classes.Db
             {
                 HistoryTests test = new HistoryTests();
 
+                test.id = reader["id"] + "";
                 test.name = reader["name"] + "";
                 string time = reader["progressTime"] + "";
                 test.time = TimeSpan.ParseExact(time, "hh\\:mm\\:ss\\.fffffff", System.Globalization.CultureInfo.InvariantCulture);
                 test.result = reader["res"] + "";
-                // test.vals = null; // TODO get vals, needs another query
                 
                 tests.Add(test);
             }
 
             reader.Close();
 
-            //Disconnect DB
+            // Disconnect DB
+            this._db.DisconnectDb();
+
+            return tests;
+        }
+
+        public List<HistoryTestsValue> GetTestValues(string testId)
+        {
+            // Connect to DB
+            this._db.ConnectDb();
+            MySqlDataReader reader = this._db.execR($"SELECT * FROM ddm_tests_vls WHERE tid = {testId}");
+
+            List<HistoryTestsValue> tests = new List<HistoryTestsValue>();
+            
+            // Read data and store in a list
+            while (reader.Read())
+            {
+                HistoryTestsValue test = new HistoryTestsValue();
+                test.value = new HistoryTestsValueData();
+
+                test.id = reader["id"] + "";
+                test.key = reader["key"] + "";
+                test.result = reader["res"] + "";
+                
+                test.value.min = reader["vls_min"] + "";
+                test.value.max = reader["vls_max"] + "";
+                test.value.avg = reader["vls_avg"] + "";
+                
+                tests.Add(test);
+            }
+            reader.Close();
+            
+            // Disconnect DB
             this._db.DisconnectDb();
 
             return tests;
